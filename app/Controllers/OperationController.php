@@ -82,7 +82,8 @@ class OperationController extends BaseController
         $operationModel = new \App\Models\OperationsModel();
         $resultat = $operationModel->effectuerDepot($idUtilisateur, $montant, $dateOperation);
 
-        return redirect()->to('/client/solde')->with(
+        // Modification : Redirection vers le Dashboard
+        return redirect()->to('/client/dashboard')->with(
             $resultat['success'] ? 'success' : 'error',
             $resultat['message']
         );
@@ -107,12 +108,13 @@ class OperationController extends BaseController
             $dateOperation = $this->request->getPost('dateOperation');
             $resultat = $operationModel->effectuerRetrait($idUtilisateur, $montant, $dateOperation);
 
-            return redirect()->to('/client/solde')->with(
+            // Modification : Redirection vers le Dashboard
+            return redirect()->to('/client/dashboard')->with(
                 $resultat['success'] ? 'success' : 'error',
                 $resultat['message']
             );
         } catch (\RuntimeException $exception) {
-            return redirect()->to('/client/solde')->with('error', $exception->getMessage());
+            return redirect()->to('/client/dashboard')->with('error', $exception->getMessage());
         }
     }
 
@@ -123,25 +125,50 @@ class OperationController extends BaseController
 
     public function transfert()
     {
+        // Correction : idUtilisateurs -> idUtilisateur
         $idUtilisateur = session()->get('idUtilisateur');
         if (!$idUtilisateur) {
-            return redirect()->to('/login');
+            return redirect()->to('/');
         }
 
-        try {
-            $numeroDestinataire = $this->request->getPost('numeroTelephone');
-            $montant = (int) $this->request->getPost('montant');
+        $numeroDestinataire  = $this->request->getPost('numeroTelephone');
+        $montant             = (int) $this->request->getPost('montant');
+        $inclureFraisRetrait = (bool) $this->request->getPost('inclureFraisRetrait');
 
-            $operationModel = new \App\Models\OperationsModel();
-            $dateOperation = $this->request->getPost('dateOperation');
-            $resultat = $operationModel->effectuerTransfert($idUtilisateur, $numeroDestinataire, $montant, $dateOperation);
+        $operationModel = new \App\Models\OperationsModel();
+        $resultat = $operationModel->effectuerTransfert($idUtilisateur, $numeroDestinataire, $montant, $inclureFraisRetrait);
 
-            return redirect()->to('/client/solde')->with(
-                $resultat['success'] ? 'success' : 'error',
-                $resultat['message']
-            );
-        } catch (\RuntimeException $exception) {
-            return redirect()->to('/client/solde')->with('error', $exception->getMessage());
+        // Modification : Redirection vers le Dashboard
+        return redirect()->to('/client/dashboard')->with(
+            $resultat['success'] ? 'success' : 'error',
+            $resultat['message']
+        );
+    }
+
+    public function transfertMultipleForm()
+    {
+        return view('client/transfert_multiple');
+    }
+
+    public function transfertMultiple()
+    {
+        // Correction : idUtilisateurs -> idUtilisateur
+        $idUtilisateur = session()->get('idUtilisateur');
+        if (!$idUtilisateur) {
+            return redirect()->to('/');
         }
+
+        $numeros             = $this->request->getPost('numeros') ?? [];
+        $montantTotal        = (int) $this->request->getPost('montantTotal');
+        $inclureFraisRetrait = (bool) $this->request->getPost('inclureFraisRetrait');
+
+        $operationModel = new \App\Models\OperationsModel();
+        $resultat = $operationModel->effectuerTransfertMultiple($idUtilisateur, $numeros, $montantTotal, $inclureFraisRetrait);
+
+        // Modification : Redirection vers le Dashboard
+        return redirect()->to('/client/dashboard')->with(
+            $resultat['success'] ? 'success' : 'error',
+            $resultat['message']
+        );
     }
 }

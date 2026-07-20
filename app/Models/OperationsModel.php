@@ -1,15 +1,23 @@
 <?php
-namespace App\Models;
-use CodeIgniter\Model;
-use App\Models\FraisModel;
 
+namespace App\Models;
+
+use CodeIgniter\Model;
 
 class OperationsModel extends Model
 {
-    protected $table = 'operations';
+    protected $table      = 'operations';
     protected $primaryKey = 'idOperations';
-    protected $allowedFields = ['montant', 'fraisAppliques', 'dateOperation', 'idTypesOperations', 'idSource', 'idDestinataire'];
+    protected $allowedFields = [
+        'montant', 'fraisAppliques', 'dateOperation',
+        'idTypesOperations', 'idSource', 'idDestinataire', 'idOperateurs',
+    ];
 
+    /**
+     * Solde = somme reçue (destinataire) - somme envoyée + frais déjà stockés (source)
+     * IMPORTANT : on lit fraisAppliques tel qu'enregistré, on ne le recalcule JAMAIS ici,
+     * car il peut combiner plusieurs frais (transfert + retrait) ou être réparti (envoi multiple).
+     */
     public function getSolde(int $id): float
     {
         $db = \Config\Database::connect();
@@ -22,10 +30,10 @@ class OperationsModel extends Model
         $solde = 0.0;
 
         foreach ($operations as $operation) {
-            $montant = (float) ($operation['montant'] ?? 0);
-            $idSource = $operation['idSource'] ?? null;
+            $montant        = (float) ($operation['montant'] ?? 0);
+            $fraisAppliques = (float) ($operation['fraisAppliques'] ?? 0);
+            $idSource       = $operation['idSource'] ?? null;
             $idDestinataire = $operation['idDestinataire'] ?? null;
-            $idTypeOperation = (int) ($operation['idTypesOperations'] ?? 0);
 
             if ((int) $idDestinataire === $id) {
                 $solde += $montant;
@@ -33,8 +41,7 @@ class OperationsModel extends Model
             }
 
             if ((int) $idSource === $id) {
-                $frais = $this->getFrais($idTypeOperation, (int) $montant);
-                $solde -= $montant + $frais;
+                $solde -= $montant + $fraisAppliques;
             }
         }
 
@@ -90,7 +97,6 @@ class OperationsModel extends Model
         return $query->getResultArray();
     }
 
-
     public function gain($date = null)
     {
         $builder = $this->select('fraisAppliques')
@@ -110,7 +116,6 @@ class OperationsModel extends Model
 
         return (float) $total;
     }
-
 
     public function getFrais(int $idTypesOperations, int $montant): int
     {
@@ -132,6 +137,19 @@ class OperationsModel extends Model
             return ['success' => false, 'message' => 'Montant invalide.'];
         }
 
+        $utilisateurModel = new \App\Models\UtilisateursModel();
+        $prefixeModel     = new \App\Models\PrefixeModel();
+
+        $utilisateur = $utilisateurModel->find($idUtilisateur);
+        if (!$utilisateur) {
+            return ['success' => false, 'message' => 'Utilisateur introuvable.'];
+        }
+
+        $idOperateur = $prefixeModel->getOperateurByNumero($utilisateur['numeroTelephone']);
+        if ($idOperateur === null) {
+            return ['success' => false, 'message' => 'Votre numéro ne correspond à aucun opérateur connu.'];
+        }
+
         $idTypeDepot = 1;
 
         $this->insert([
@@ -141,6 +159,7 @@ class OperationsModel extends Model
             'idTypesOperations' => $idTypeDepot,
             'idSource'          => null,
             'idDestinataire'    => $idUtilisateur,
+            'idOperateurs'      => $idOperateur,
         ]);
 
         return ['success' => true, 'message' => 'Dépôt effectué avec succès.'];
@@ -152,13 +171,26 @@ class OperationsModel extends Model
             return ['success' => false, 'message' => 'Montant invalide.'];
         }
 
+        $utilisateurModel = new \App\Models\UtilisateursModel();
+        $prefixeModel     = new \App\Models\PrefixeModel();
+
+        $utilisateur = $utilisateurModel->find($idUtilisateur);
+        if (!$utilisateur) {
+            return ['success' => false, 'message' => 'Utilisateur introuvable.'];
+        }
+
+        $idOperateur = $prefixeModel->getOperateurByNumero($utilisateur['numeroTelephone']);
+        if ($idOperateur === null) {
+            return ['success' => false, 'message' => 'Votre numéro ne correspond à aucun opérateur connu.'];
+        }
+
         $idTypeRetrait = 2;
 
         $frais = $this->getFrais($idTypeRetrait, $montant);
         $solde = $this->getSolde($idUtilisateur);
 
         if ($solde < $montant + $frais) {
-            throw new \RuntimeException('Solde insuffisant pour effectuer ce retrait.');
+            return ['success' => false, 'message' => 'Solde insuffisant pour effectuer ce retrait.'];
         }
 
         $this->insert([
@@ -168,49 +200,188 @@ class OperationsModel extends Model
             'idTypesOperations' => $idTypeRetrait,
             'idSource'          => $idUtilisateur,
             'idDestinataire'    => null,
+            'idOperateurs'      => $idOperateur,
         ]);
 
         return ['success' => true, 'message' => 'Retrait effectué avec succès.'];
     }
 
-    public function effectuerTransfert(int $idUtilisateurSource, string $numeroDestinataire, int $montant, string $dateOperation): array
-    {
+    /**
+     * Transfert : gère le même opérateur (avec option frais de retrait) et l'autre opérateur (non crédité pour l'instant)
+     *
+     * @param int|null $fraisTransfertOverride Si fourni, remplace le calcul automatique du frais de transfert.
+     *                                          Utilisé par effectuerTransfertMultiple() pour répartir un frais
+     *                                          calculé une seule fois sur le montant total.
+     */
+    public function effectuerTransfert(
+        int $idUtilisateurSource,
+        string $numeroDestinataire,
+        int $montant,
+        bool $inclureFraisRetrait = false,
+        ?int $fraisTransfertOverride = null
+    ): array {
         if ($montant <= 0) {
             return ['success' => false, 'message' => 'Montant invalide.'];
         }
 
         $utilisateurModel = new \App\Models\UtilisateursModel();
-        $destinataire = $utilisateurModel->where('numeroTelephone', $numeroDestinataire)->first();
+        $prefixeModel     = new \App\Models\PrefixeModel();
 
-        if (!$destinataire) {
-            return ['success' => false, 'message' => 'Destinataire introuvable.'];
+        $sourceUser = $utilisateurModel->find($idUtilisateurSource);
+        if (!$sourceUser) {
+            return ['success' => false, 'message' => 'Utilisateur source introuvable.'];
         }
 
-        $destinataireId = is_array($destinataire) ? $destinataire['idUtilisateurs'] : $destinataire->idUtilisateurs;
+        $idOperateurSource       = $prefixeModel->getOperateurByNumero($sourceUser['numeroTelephone']);
+        $idOperateurDestinataire = $prefixeModel->getOperateurByNumero($numeroDestinataire);
 
-        if ($destinataireId === $idUtilisateurSource) {
+        if ($idOperateurSource === null) {
+            return ['success' => false, 'message' => 'Votre numéro ne correspond à aucun opérateur connu.'];
+        }
+        if ($idOperateurDestinataire === null) {
+            return ['success' => false, 'message' => 'Numéro destinataire invalide.'];
+        }
+
+        $estMemeOperateur = ($idOperateurSource === $idOperateurDestinataire);
+
+        $destinataire = $utilisateurModel->where('numeroTelephone', $numeroDestinataire)->first();
+
+        if ($destinataire && (int) $destinataire['idUtilisateurs'] === $idUtilisateurSource) {
             return ['success' => false, 'message' => 'Impossible de vous transférer à vous-même.'];
         }
 
-        $idTypeTransfert = 3;
-
-        $frais = $this->getFrais($idTypeTransfert, $montant);
-        $solde = $this->getSolde($idUtilisateurSource);
-
-        if ($solde < $montant + $frais) {
-            throw new \RuntimeException('Solde insuffisant pour effectuer ce transfert.');
+        if ($estMemeOperateur && !$destinataire) {
+            return ['success' => false, 'message' => 'Destinataire introuvable.'];
         }
 
+        $idTypeTransfert = 3; // adapte selon ta table typesOperations
+        $idTypeRetrait   = 2;
+
+        // Le frais de transfert peut être imposé de l'extérieur (envoi multiple = calculé sur le total)
+        $fraisTransfert = $fraisTransfertOverride ?? $this->getFrais($idTypeTransfert, $montant);
+
+        // Le frais de retrait, lui, est TOUJOURS calculé sur le montant réellement reçu par ce destinataire
+        $fraisRetrait = ($inclureFraisRetrait && $estMemeOperateur)
+            ? $this->getFrais($idTypeRetrait, $montant)
+            : 0;
+
+        $totalDebite = $montant + $fraisTransfert + $fraisRetrait;
+
+        $solde = $this->getSolde($idUtilisateurSource);
+        if ($solde < $totalDebite) {
+            return ['success' => false, 'message' => 'Solde insuffisant.'];
+        }
+
+        $montantEnregistre    = $estMemeOperateur ? ($montant + $fraisRetrait) : $montant;
+        $idDestinataireInsert = $estMemeOperateur ? (int) $destinataire['idUtilisateurs'] : null;
+        $idOperateurInsert    = $estMemeOperateur ? $idOperateurSource : $idOperateurDestinataire;
+
         $this->insert([
-            'montant'           => $montant,
-            'fraisAppliques'    => $frais,
-            'dateOperation'     => $dateOperation,
+            'montant'           => $montantEnregistre,
+            'fraisAppliques'    => $fraisTransfert + $fraisRetrait,
+            'dateOperation'     => date('Y-m-d H:i:s'),
             'idTypesOperations' => $idTypeTransfert,
             'idSource'          => $idUtilisateurSource,
-            'idDestinataire'    => $destinataireId,
+            'idDestinataire'    => $idDestinataireInsert,
+            'idOperateurs'      => $idOperateurInsert,
         ]);
 
-        return ['success' => true, 'message' => 'Transfert effectué avec succès.'];
+        $message = $estMemeOperateur
+            ? 'Transfert effectué avec succès.'
+            : 'Transfert envoyé vers un autre opérateur (le crédit au destinataire n\'est pas encore géré par le système).';
+
+        return ['success' => true, 'message' => $message];
+    }
+
+    /**
+     * Envoi multiple : divise montantTotal entre plusieurs numéros, uniquement même opérateur.
+     *
+     * Frais de transfert : calculé UNE SEULE FOIS sur montantTotal, puis réparti entre les lignes
+     * d'opérations (le dernier destinataire absorbe le reste de la division entière, pour que la
+     * somme des frais enregistrés corresponde exactement au frais réellement facturé).
+     *
+     * Frais de retrait (optionnel) : calculé individuellement sur le montant divisé de chaque destinataire.
+     */
+    public function effectuerTransfertMultiple(int $idUtilisateurSource, array $numeros, int $montantTotal, bool $inclureFraisRetrait = false): array
+    {
+        $numeros = array_values(array_unique(array_filter($numeros)));
+        $nombre  = count($numeros);
+
+        if ($nombre < 2) {
+            return ['success' => false, 'message' => 'Il faut au moins 2 destinataires pour un envoi multiple.'];
+        }
+
+        if ($montantTotal <= 0) {
+            return ['success' => false, 'message' => 'Montant invalide.'];
+        }
+
+        $montantParDestinataire = intdiv($montantTotal, $nombre);
+        if ($montantParDestinataire <= 0) {
+            return ['success' => false, 'message' => 'Montant trop faible pour être divisé entre tous les destinataires.'];
+        }
+
+        $utilisateurModel = new \App\Models\UtilisateursModel();
+        $prefixeModel     = new \App\Models\PrefixeModel();
+
+        $sourceUser = $utilisateurModel->find($idUtilisateurSource);
+        if (!$sourceUser) {
+            return ['success' => false, 'message' => 'Utilisateur source introuvable.'];
+        }
+
+        $idOperateurSource = $prefixeModel->getOperateurByNumero($sourceUser['numeroTelephone']);
+
+        // Validation complète AVANT tout insert : tous les numéros doivent être notre opérateur et exister
+        foreach ($numeros as $numero) {
+            $idOperateurDest = $prefixeModel->getOperateurByNumero($numero);
+
+            if ($idOperateurDest === null || $idOperateurDest !== $idOperateurSource) {
+                return ['success' => false, 'message' => "Le numéro $numero n'est pas dans notre réseau. L'envoi multiple est réservé au même opérateur."];
+            }
+
+            $dest = $utilisateurModel->where('numeroTelephone', $numero)->first();
+            if (!$dest) {
+                return ['success' => false, 'message' => "Le numéro $numero est introuvable."];
+            }
+        }
+
+        $idTypeTransfert = 3; // même constante que dans effectuerTransfert
+
+        // Frais de transfert calculé UNE SEULE FOIS sur le montant total
+        $fraisTransfertTotal = $this->getFrais($idTypeTransfert, $montantTotal);
+        $fraisTransfertParDestinataire = intdiv($fraisTransfertTotal, $nombre);
+        $resteFrais = $fraisTransfertTotal - ($fraisTransfertParDestinataire * $nombre);
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        foreach ($numeros as $index => $numero) {
+            // Le reste de la division entière est absorbé par le premier destinataire,
+            // pour que la somme totale des frais enregistrés soit exacte au centime près
+            $fraisTransfertCeDestinataire = $fraisTransfertParDestinataire + ($index === 0 ? $resteFrais : 0);
+
+            $resultat = $this->effectuerTransfert(
+                $idUtilisateurSource,
+                $numero,
+                $montantParDestinataire,
+                $inclureFraisRetrait,
+                $fraisTransfertCeDestinataire
+            );
+
+            if (!$resultat['success']) {
+                $db->transRollback();
+                return ['success' => false, 'message' => "Échec pour $numero : " . $resultat['message']];
+            }
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return ['success' => false, 'message' => "Erreur lors de l'enregistrement des transferts."];
+        }
+
+        return [
+            'success' => true,
+            'message' => "Envoi multiple effectué : $montantParDestinataire Ar envoyés à $nombre destinataires (frais de transfert total : $fraisTransfertTotal Ar).",
+        ];
     }
 }
-

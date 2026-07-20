@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <title>Mon Espace Client - Mobile Money</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Ajout d'une couleur violette personnalisée pour le transfert multiple */
+        .border-purple {
+            border-left-color: #6f42c1 !important;
+        }
+        .btn-purple {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+        .btn-purple:hover {
+            background-color: #59339d;
+            color: #fff;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container py-5">
@@ -26,6 +40,7 @@
     </div>
 
     <div class="row g-4">
+        <!-- Solde -->
         <div class="col-md-4">
             <div class="card h-100 p-4 border-start border-primary border-4 shadow-sm">
                 <h4>Voir mon solde</h4>
@@ -34,6 +49,7 @@
             </div>
         </div>
 
+        <!-- Historique -->
         <div class="col-md-4">
             <div class="card h-100 p-4 border-start border-info border-4 shadow-sm">
                 <h4>Mes Transactions</h4>
@@ -42,6 +58,7 @@
             </div>
         </div>
 
+        <!-- Transfert Simple -->
         <div class="col-md-4">
             <div class="card h-100 p-4 border-start border-success border-4 shadow-sm">
                 <h4>Faire un Transfert</h4>
@@ -50,6 +67,16 @@
             </div>
         </div>
 
+        <!-- Transfert Multiple (Nouveau) -->
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-start border-purple border-4 shadow-sm">
+                <h4>Transfert Multiple</h4>
+                <p class="text-muted">Divisez et envoyez un montant équitablement entre plusieurs numéros.</p>
+                <a href="<?= base_url('client/transfert-multiple') ?>" class="btn btn-purple mt-auto">Envoi groupé</a>
+            </div>
+        </div>
+
+        <!-- Dépôt -->
         <div class="col-md-4">
             <div class="card h-100 p-4 border-start border-warning border-4 shadow-sm">
                 <h4>Faire un Dépôt</h4>
@@ -58,6 +85,7 @@
             </div>
         </div>
 
+        <!-- Retrait -->
         <div class="col-md-4">
             <div class="card h-100 p-4 border-start border-danger border-4 shadow-sm">
                 <h4>Faire un Retrait</h4>
