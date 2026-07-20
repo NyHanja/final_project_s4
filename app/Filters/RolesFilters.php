@@ -18,12 +18,10 @@ class RolesFilters implements FilterInterface
 
         if (!empty($arguments)) {
             if (!in_array($userRole, $arguments)) {
-                return redirect()->to('/dashboard')->with('error', 'Accès refusé : Vous n\'avez pas les permissions nécessaires.');
+                return redirect()->to('/')->with('error', 'Accès refusé : vous n\'avez pas les permissions nécessaires.');
             }
         }
     }
 
-    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-    {
-    }
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
 }

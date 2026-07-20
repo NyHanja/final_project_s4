@@ -7,11 +7,50 @@
 </head>
 <body class="bg-light">
 <div class="container py-5">
+
     <div class="mb-4">
         <a href="<?= base_url('client/dashboard') ?>" class="btn btn-secondary btn-sm">← Retour au Tableau de bord</a>
         <h1 class="mt-2">Mon Historique Personnel</h1>
     </div>
 
+    <!-- Formulaire de filtre -->
+    <div class="card p-3 shadow-sm mb-4">
+        <form method="get" action="<?= base_url('client/historique') ?>" class="row g-3 align-items-end">
+
+            <div class="col-md-3">
+                <label class="form-label">Du</label>
+                <input type="date" name="dateDebut" class="form-control"
+                       value="<?= esc($filtres['dateDebut'] ?? '') ?>">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Au</label>
+                <input type="date" name="dateFin" class="form-control"
+                       value="<?= esc($filtres['dateFin'] ?? '') ?>">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Type d'opération</label>
+                <select name="idTypesOperations" class="form-select">
+                    <option value="">Tous</option>
+                    <?php foreach ($types as $type): ?>
+                        <option value="<?= $type['idTypesOperations'] ?>"
+                            <?= (($filtres['idTypesOperations'] ?? '') == $type['idTypesOperations']) ? 'selected' : '' ?>>
+                            <?= esc($type['libelle']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                <a href="<?= base_url('client/historique') ?>" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Résultats -->
     <div class="card p-4 shadow-sm">
         <table class="table table-hover">
             <thead>
@@ -39,11 +78,12 @@
                         </td>
                     </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="5" class="text-center text-muted">Vous n'avez effectué aucune transaction pour le moment.</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted">Aucune opération pour ces critères.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
+
 </div>
 </body>
 </html>

@@ -3,12 +3,13 @@ namespace App\Models;
 use CodeIgniter\Model;
 use App\Models\FraisModel;
 
+use CodeIgniter\Model;
+
 class OperationsModel extends Model
 {
     protected $table = 'operations';
     protected $primaryKey = 'idOperations';
     protected $allowedFields = ['montant', 'fraisAppliques', 'dateOperation', 'idTypesOperations', 'idSource', 'idDestinataire'];
-
 
     public function getSolde(int $id): float
     {
@@ -19,37 +20,56 @@ class OperationsModel extends Model
             FROM operations
             WHERE idDestinataire = ? OR idSource = ?";
 
-        $query = $this->$db->query($sql, [$id, $id, $id, $id]);
+        $query = $db->query($sql, [$id, $id, $id, $id]);
+
         return (float) ($query->getRow()->solde ?? 0);
     }
 
-    public function getHistorique(int $idUtilisateur): array
+    public function getHistorique(int $idUtilisateur, array $filtres = []): array
     {
-        $db = \Config\Database::connect();
         $sql = "
-            SELECT
-                operations.idOperations,
-                operations.montant,
-                operations.fraisAppliques,
-                operations.dateOperation,
-                typesOperations.libelle AS typeLibelle,
-                operations.idSource,
-                operations.idDestinataire,
-                CASE
-                    WHEN operations.idDestinataire = ? THEN 'entrant'
-                    ELSE 'sortant'
-                END AS sens,
-                src.numeroTelephone AS numeroSource,
-                dst.numeroTelephone AS numeroDestinataire
-            FROM operations
-            JOIN typesOperations ON typesOperations.idTypesOperations = operations.idTypesOperations
-            LEFT JOIN utilisateurs src ON src.idUtilisateurs = operations.idSource
-            LEFT JOIN utilisateurs dst ON dst.idUtilisateurs = operations.idDestinataire
-            WHERE operations.idSource = ? OR operations.idDestinataire = ?
-            ORDER BY operations.dateOperation DESC
-        ";
+        SELECT
+            operations.idOperations,
+            operations.montant,
+            operations.fraisAppliques,
+            operations.dateOperation,
+            operations.idTypesOperations,
+            typesOperations.libelle AS typeLibelle,
+            operations.idSource,
+            operations.idDestinataire,
+            CASE
+                WHEN operations.idDestinataire = ? THEN 'entrant'
+                ELSE 'sortant'
+            END AS sens,
+            src.numeroTelephone AS numeroSource,
+            dst.numeroTelephone AS numeroDestinataire
+        FROM operations
+        JOIN typesOperations ON typesOperations.idTypesOperations = operations.idTypesOperations
+        LEFT JOIN utilisateurs src ON src.idUtilisateurs = operations.idSource
+        LEFT JOIN utilisateurs dst ON dst.idUtilisateurs = operations.idDestinataire
+        WHERE (operations.idSource = ? OR operations.idDestinataire = ?)
+    ";
 
-        $query = $this->$db->query($sql, [$idUtilisateur, $idUtilisateur, $idUtilisateur]);
+        $params = [$idUtilisateur, $idUtilisateur, $idUtilisateur];
+
+        if (!empty($filtres['dateDebut'])) {
+            $sql .= " AND date(operations.dateOperation) >= ? ";
+            $params[] = $filtres['dateDebut'];
+        }
+
+        if (!empty($filtres['dateFin'])) {
+            $sql .= " AND date(operations.dateOperation) <= ? ";
+            $params[] = $filtres['dateFin'];
+        }
+
+        if (!empty($filtres['idTypesOperations'])) {
+            $sql .= " AND operations.idTypesOperations = ? ";
+            $params[] = $filtres['idTypesOperations'];
+        }
+
+        $sql .= " ORDER BY operations.dateOperation DESC ";
+
+        $query = $this->db->query($sql, $params);
 
         return $query->getResultArray();
     }
@@ -97,7 +117,7 @@ class OperationsModel extends Model
 
         $this->insert([
             'montant'           => $montant,
-            'fraisAppliques'    => 0, 
+            'fraisAppliques'    => 0,
             'dateOperation'     => $dateOperation,
             'idTypesOperations' => $idTypeDepot,
             'idSource'          => null,
@@ -106,7 +126,6 @@ class OperationsModel extends Model
 
         return ['success' => true, 'message' => 'Dépôt effectué avec succès.'];
     }
-
 
     public function effectuerRetrait(int $idUtilisateur, int $montant, string $dateOperation): array
     {
@@ -148,7 +167,9 @@ class OperationsModel extends Model
             return ['success' => false, 'message' => 'Destinataire introuvable.'];
         }
 
-        if ($destinataire->idUtilisateurs == $idUtilisateurSource) {
+        $destinataireId = is_array($destinataire) ? $destinataire['idUtilisateurs'] : $destinataire->idUtilisateurs;
+
+        if ($destinataireId === $idUtilisateurSource) {
             return ['success' => false, 'message' => 'Impossible de vous transférer à vous-même.'];
         }
 
@@ -167,7 +188,7 @@ class OperationsModel extends Model
             'dateOperation'     => $dateOperation,
             'idTypesOperations' => $idTypeTransfert,
             'idSource'          => $idUtilisateurSource,
-            'idDestinataire'    => $destinataire->idUtilisateurs,
+            'idDestinataire'    => $destinataireId,
         ]);
 
         return ['success' => true, 'message' => 'Transfert effectué avec succès.'];

@@ -1,8 +1,10 @@
-<?php 
-use CodeIgniter\Model;
+<?php
+
 namespace App\Models;
 
-class TypesOperations extends Model
+use CodeIgniter\Model;
+
+class TypesOperationsModel extends Model
 {
     protected $table = 'typesOperations';
     protected $primaryKey = 'idTypesOperations';

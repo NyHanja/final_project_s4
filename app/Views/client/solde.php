@@ -13,14 +13,16 @@
             <div class="card shadow-sm">
                 <div class="card-body text-center">
 
-                    <?php if (!$utilisateur): ?>
+                    <?php $user = is_array($utilisateur) ? $utilisateur : (array) $utilisateur; ?>
+
+                    <?php if (empty($user)): ?>
                         <p class="text-danger">Utilisateur introuvable (id invalide).</p>
                     <?php else: ?>
-                        <h5 class="0378899900text-muted mb-1">
-                            <?= esc($utilisateur->prenom) ?> <?= esc($utilisateur->nom) ?>
+                        <h5 class="text-muted mb-1">
+                            <?= esc($user['prenom'] ?? '') ?> <?= esc($user['nom'] ?? '') ?>
                         </h5>
                         <p class="text-muted small mb-4">
-                            <?= esc($utilisateur->numeroTelephone) ?>
+                            <?= esc($user['numeroTelephone'] ?? '') ?>
                         </p>
 
                         <p class="mb-1">Solde disponible</p>

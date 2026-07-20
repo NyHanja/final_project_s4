@@ -1,9 +1,12 @@
-<?php 
+<?php
 
-use Config\Filters;
 namespace App\Filters;
 
-class AuthFilters extends Filters
+use CodeIgniter\Filters\FilterInterface;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+
+class AuthFilters implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -14,6 +17,5 @@ class AuthFilters extends Filters
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        
     }
 }
