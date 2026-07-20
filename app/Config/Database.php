@@ -167,7 +167,7 @@ class Database extends Config
         'hostname'    => '127.0.0.1',
         'username'    => '',
         'password'    => '',
-        'database'    => ':memory:',
+        'database'    => WRITEPATH . 'database.db',
         'DBDriver'    => 'SQLite3',
         'DBPrefix'    => '',  
         'pConnect'    => false,
