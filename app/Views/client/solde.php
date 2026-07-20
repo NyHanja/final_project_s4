@@ -16,7 +16,7 @@
                     <?php if (!$utilisateur): ?>
                         <p class="text-danger">Utilisateur introuvable (id invalide).</p>
                     <?php else: ?>
-                        <h5 class="text-muted mb-1">
+                        <h5 class="0378899900text-muted mb-1">
                             <?= esc($utilisateur->prenom) ?> <?= esc($utilisateur->nom) ?>
                         </h5>
                         <p class="text-muted small mb-4">
