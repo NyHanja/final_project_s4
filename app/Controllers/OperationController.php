@@ -11,45 +11,56 @@ class OperationController extends BaseController
 
     public function VoirSolde()
     {
-        $idUtilisateur = session()->get('idUtilisateurs');
+        $idUtilisateur = session()->get('idUtilisateur');
 
         if (!$idUtilisateur) {
             return redirect()->to('/login');
         }
 
         $operationModel = new \App\Models\OperationsModel();
-        $solde = $operationModel->getSolde($idUtilisateur);
+        $utilisateurModel = new \App\Models\UtilisateursModel();
 
-        return view('client/solde', ['solde' => $solde]);
+        $solde = $operationModel->getSolde($idUtilisateur);
+        $utilisateur = $utilisateurModel->find($idUtilisateur);
+
+        return view('client/solde', [
+            'solde' => $solde,
+            'utilisateur' => $utilisateur,
+        ]);
     }
 
     public function voirHistorique()
     {
-        $idUtilisateur = session()->get('idUtilisateurs');
-
+        $idUtilisateur = session()->get('idUtilisateur');
         if (!$idUtilisateur) {
-            return redirect()->to('/login');
+            return redirect()->to('/');
         }
 
         $operationModel   = new \App\Models\OperationsModel();
         $utilisateurModel = new \App\Models\UtilisateursModel();
+        $typeModel        = new \App\Models\TypesOperationsModel(); // adapte le nom si différent
+
+        $filtres = [
+            'dateDebut'         => $this->request->getGet('dateDebut'),
+            'dateFin'           => $this->request->getGet('dateFin'),
+            'idTypesOperations' => $this->request->getGet('idTypesOperations'),
+        ];
 
         $utilisateur = $utilisateurModel->find($idUtilisateur);
-        $historique  = $operationModel->getHistorique($idUtilisateur);
+        $historique  = $operationModel->getHistorique($idUtilisateur, array_filter($filtres));
+        $types       = $typeModel->findAll(); 
 
         return view('client/historique', [
             'utilisateur' => $utilisateur,
-            'historique'  => $historique,
+            'operations'  => $historique,
+            'types'       => $types,
+            'filtres'     => $filtres,
         ]);
-    }
-    public function depotForm()
-    {
-        return view('client/depot');
     }
 
     public function depot()
     {
-        $idUtilisateur = session()->get('idUtilisateurs');
+        $idUtilisateur = session()->get('idUtilisateur');
         if (!$idUtilisateur) {
             return redirect()->to('/login');
         }
@@ -73,7 +84,7 @@ class OperationController extends BaseController
 
     public function retrait()
     {
-        $idUtilisateur = session()->get('idUtilisateurs');
+        $idUtilisateur = session()->get('idUtilisateur');
         if (!$idUtilisateur) {
             return redirect()->to('/login');
         }
@@ -97,7 +108,7 @@ class OperationController extends BaseController
 
     public function transfert()
     {
-        $idUtilisateur = session()->get('idUtilisateurs');
+        $idUtilisateur = session()->get('idUtilisateur');
         if (!$idUtilisateur) {
             return redirect()->to('/login');
         }

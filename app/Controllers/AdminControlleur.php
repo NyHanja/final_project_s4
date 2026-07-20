@@ -14,7 +14,7 @@ class AdminControlleur extends BaseController
         $operationModel = new \App\Models\OperationsModel();
         $data['operations'] = $operationModel->findAll(); // Récupère tout l'historique global
 
-        return view('admin/operations', $data);
+        return view('admin/operation', $data);
     }
 
     public function frais(): string
