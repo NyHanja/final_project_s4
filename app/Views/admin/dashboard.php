@@ -35,6 +35,9 @@
                 </div>
             </div>
         </div>
+        <a href="<?= base_url('admin/prefixes') ?>">
+    Gestion des préfixes
+</a>
     </div>
 </body>
 </html>
