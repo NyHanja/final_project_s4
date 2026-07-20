@@ -8,7 +8,7 @@ class OperationsModel extends Model
 {
     protected $table = 'operations';
     protected $primaryKey = 'idOperations';
-    protected $allowedFields = ['montant', 'fraisAppliques', 'dateOperation', 'idTypesOperations', 'idSource', 'idDestinataire'];
+    protected $allowedFields = ['montant', 'fraisAppliques', 'dateOperation', 'idTypesOperations', 'idSource', 'idDestinataire', 'idOperateurs'];
 
     public function getSolde(int $id): float
     {
@@ -39,6 +39,56 @@ class OperationsModel extends Model
         }
 
         return (float) $solde;
+    }
+    public function calculerGainOperation(array $operation): float
+    {
+        $frais = (float) $operation['fraisAppliques'];
+        $montant = (float) $operation['montant'];
+
+        $idDestinataire = $operation['idDestinataire'];
+
+        // Récupérer l'opérateur du destinataire
+        $db = \Config\Database::connect();
+
+        $destinataire = $db->table('utilisateurs u')
+            ->select('p.idOperateurs')
+            ->join('prefixes p', "SUBSTR(u.numeroTelephone,1,3) = p.valeur")
+            ->where('u.idUtilisateurs', $idDestinataire)
+            ->get()
+            ->getRowArray();
+
+
+        if (!$destinataire) {
+            return 0;
+        }
+
+
+        // Ton opérateur (exemple : Telma id = 1)
+        $monOperateur = 1;
+
+
+        // Même opérateur
+        if ($destinataire['idOperateurs'] == $monOperateur) {
+
+            return $frais;
+
+        }
+
+
+        // Autre opérateur : chercher la commission
+        $commission = $db->table('commissions')
+            ->where('idOperateurs', $destinataire['idOperateurs'])
+            ->get()
+            ->getRowArray();
+
+
+        if (!$commission) {
+            return 0;
+        }
+
+
+        // Commission calculée sur le montant envoyé
+        return $montant * ($commission['pourcentage'] / 100);
     }
 
     public function getHistorique(int $idUtilisateur, array $filtres = []): array
@@ -91,11 +141,9 @@ class OperationsModel extends Model
     }
 
 
-    public function gain($date = null)
+    public function gain($date = null): float
     {
-        $builder = $this->select('fraisAppliques')
-            ->where('idTypesOperations >', 1)
-            ->where('fraisAppliques >=', 0);
+        $builder = $this->whereIn('idTypesOperations', [2, 3]);
 
         if ($date != null) {
             $builder->where('DATE(dateOperation)', $date);
@@ -104,11 +152,88 @@ class OperationsModel extends Model
         $operations = $builder->findAll();
 
         $total = 0;
+
         foreach ($operations as $operation) {
-            $total += (int) ($operation['fraisAppliques'] ?? 0);
+            $total += $this->calculerGainOperation($operation);
         }
 
-        return (float) $total;
+        return $total;
+    }
+    public function gainParOperateur($date = null): array
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $this
+            ->select('operations.*')
+            ->whereIn('idTypesOperations', [2, 3]);
+
+        if ($date != null) {
+            $builder->where('DATE(dateOperation)', $date);
+        }
+
+        $operations = $builder->findAll();
+
+   
+        $monOperateur = 1;
+
+        $gains = [];
+
+        foreach ($operations as $operation) {
+
+            $gain = 0;
+            $idOperateur = null;
+            $nomOperateur = "";
+
+            if (!empty($operation['idDestinataire']) ) {
+
+                $destinataire = $db->table('utilisateurs u')
+                    ->select('o.idOperateurs, o.nom')
+                    ->join('prefixes p', "SUBSTR(u.numeroTelephone,1,3)=p.valeur")
+                    ->join('operateurs o', 'o.idOperateurs=p.idOperateurs')
+                    ->where('u.idUtilisateurs', $operation['idDestinataire'])
+                    ->get()
+                    ->getRowArray();
+
+                if ($destinataire) {
+
+                    $idOperateur = $destinataire['idOperateurs'];
+                    $nomOperateur = $destinataire['nom'];
+                    $frais = $operation['fraisAppliques'];
+
+                    if ($idOperateur != $monOperateur) {
+
+                       
+
+                        $commission = $db->table('commissions')
+                            ->where('idOperateurs', $idOperateur)
+                            ->get()
+                            ->getRowArray();
+
+                        if ($commission) {
+                            $gain = $operation['montant'] * ($commission['pourcentage'] / 100);
+                        }
+                    }
+
+                    if (!isset($gains[$idOperateur])) {
+                        $gains[$idOperateur] = [
+                            'operateur' => $nomOperateur,
+                            'gain' => 0
+                        ];
+                    }
+                    if($idOperateur !=1){
+                        $gains[$idOperateur]['gain'] += $gain;
+
+                    }
+                    else {
+                        $gains[1]['gain'] += frais;
+                    }
+
+                }
+            }
+        }
+
+        // Retourner les gains par opérateur
+        return array_values($gains);
     }
 
 
@@ -135,12 +260,12 @@ class OperationsModel extends Model
         $idTypeDepot = 1;
 
         $this->insert([
-            'montant'           => $montant,
-            'fraisAppliques'    => 0,
-            'dateOperation'     => $dateOperation,
+            'montant' => $montant,
+            'fraisAppliques' => 0,
+            'dateOperation' => $dateOperation,
             'idTypesOperations' => $idTypeDepot,
-            'idSource'          => null,
-            'idDestinataire'    => $idUtilisateur,
+            'idSource' => null,
+            'idDestinataire' => $idUtilisateur,
         ]);
 
         return ['success' => true, 'message' => 'Dépôt effectué avec succès.'];
@@ -162,12 +287,12 @@ class OperationsModel extends Model
         }
 
         $this->insert([
-            'montant'           => $montant,
-            'fraisAppliques'    => $frais,
-            'dateOperation'     => $dateOperation,
+            'montant' => $montant,
+            'fraisAppliques' => $frais,
+            'dateOperation' => $dateOperation,
             'idTypesOperations' => $idTypeRetrait,
-            'idSource'          => $idUtilisateur,
-            'idDestinataire'    => null,
+            'idSource' => $idUtilisateur,
+            'idDestinataire' => null,
         ]);
 
         return ['success' => true, 'message' => 'Retrait effectué avec succès.'];
@@ -202,12 +327,12 @@ class OperationsModel extends Model
         }
 
         $this->insert([
-            'montant'           => $montant,
-            'fraisAppliques'    => $frais,
-            'dateOperation'     => $dateOperation,
+            'montant' => $montant,
+            'fraisAppliques' => $frais,
+            'dateOperation' => $dateOperation,
             'idTypesOperations' => $idTypeTransfert,
-            'idSource'          => $idUtilisateurSource,
-            'idDestinataire'    => $destinataireId,
+            'idSource' => $idUtilisateurSource,
+            'idDestinataire' => $destinataireId,
         ]);
 
         return ['success' => true, 'message' => 'Transfert effectué avec succès.'];

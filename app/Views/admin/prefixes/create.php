@@ -1,19 +1,51 @@
-<h2>Ajouter un préfixe</h2>
+<form method="post" action="<?= base_url('admin/prefixes/store') ?>">
 
-<form method="post" action="admin/prefixes/store">
 
-<label>Préfixe</label>
-<input type="text" name="valeur" required>
+    <div class="mb-3">
 
-<br>
+        <label>
+            Préfixe
+        </label>
 
-<label>Opérateur</label>
-<input type="text" name="operateur" required>
+        <input class="form-control" name="valeur" placeholder="033">
 
-<br>
 
-<button type="submit">
-    Ajouter
-</button>
+    </div>
+
+
+
+    <div class="mb-3">
+
+        <label>
+            Opérateur
+        </label>
+
+
+        <select class="form-control" name="idOperateurs">
+
+
+            <?php foreach ($operateurs as $o): ?>
+
+                <option value="<?= $o['idOperateurs'] ?>">
+
+                    <?= $o['nom'] ?>
+
+                </option>
+
+
+            <?php endforeach; ?>
+
+
+        </select>
+
+
+    </div>
+
+
+
+    <button class="btn btn-success">
+        Enregistrer
+    </button>
+
 
 </form>

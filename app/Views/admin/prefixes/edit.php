@@ -1,6 +1,6 @@
 <h2>Modifier le préfixe</h2>
 
-<form method="post" action="admin/prefixes/update/<?= $prefixe['idPrefixes'] ?>">
+<form method="post" action="/admin/prefixes/update/<?= $prefixe['idPrefixes'] ?>">
 
 <label>Préfixe</label>
 
@@ -12,9 +12,14 @@
 
 <label>Opérateur</label>
 
-<input type="text"
-       name="operateur"
-       value="<?= $prefixe['operateur'] ?>">
+<select class="form-control" name="idOperateurs">
+    <?php foreach ($operateurs as $o): ?>
+        <option value="<?= $o['idOperateurs'] ?>"
+                <?= ($prefixe['idOperateurs'] == $o['idOperateurs']) ? 'selected' : '' ?>>
+            <?= $o['nom'] ?>
+        </option>
+    <?php endforeach; ?>
+</select>
 
 <br>
 

@@ -6,7 +6,14 @@ class PrefixeModel extends Model
 {
     protected $table = 'prefixes';
     protected $primaryKey = 'idPrefixes';
-    protected $allowedFields = ['valeur', 'operateur'];
+    protected $allowedFields = ['valeur', 'idOperateurs'];
+
+    public function listeWithOperateurs()
+    {
+        return $this->select('prefixes.*, operateurs.nom as operateur')
+                    ->join('operateurs', 'prefixes.idOperateurs = operateurs.idOperateurs', 'left')
+                    ->findAll();
+    }
 
     public function validationPrefixes($numeroTelephone){
         $prefixe = substr($numeroTelephone, 0, 3);

@@ -1,36 +1,80 @@
-<h2>Gestion des préfixes</h2>
+<!DOCTYPE html>
+<html>
 
-<a href="prefixes/create">
-    Ajouter un préfixe
-</a>
+<head>
+    <title>Gestion des préfixes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Préfixe</th>
-        <th>Opérateur</th>
-        <th>Actions</th>
-    </tr>
+<body class="bg-light">
 
-<?php foreach($prefixes as $p): ?>
+    <div class="container mt-5">
 
-<tr>
-    <td><?= $p['idPrefixes'] ?></td>
-    <td><?= $p['valeur'] ?></td>
-    <td><?= $p['operateur'] ?></td>
 
-    <td>
-        <a href="prefixes/edit/<?= $p['idPrefixes'] ?>">
-            Modifier
+        <h2>Gestion des préfixes opérateurs</h2>
+
+        <a href="<?= base_url('admin/prefixes/create') ?>" class="btn btn-primary mb-3">
+            Ajouter un préfixe
         </a>
 
-        <a href="prefixes/delete/<?= $p['idPrefixes'] ?>"
-           onclick="return confirm('Supprimer ce préfixe ?')">
-            Supprimer
-        </a>
-    </td>
-</tr>
 
-<?php endforeach; ?>
+        <table class="table table-bordered bg-white">
 
-</table>
+            <thead>
+                <tr>
+                    <th>Préfixe</th>
+                    <th>Opérateur</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                <?php foreach ($prefixes as $p): ?>
+
+                    <tr>
+
+                        <td>
+                            <?= esc($p['valeur']) ?>
+                        </td>
+
+
+                        <td>
+                            <?= esc($p['operateur']) ?>
+                        </td>
+
+
+                        <td>
+
+                            <a class="btn btn-warning btn-sm"
+                                href="<?= base_url('admin/prefixes/edit/' . $p['idPrefixes']) ?>">
+                                Modifier
+                            </a>
+
+
+                            <a class="btn btn-danger btn-sm"
+                                href="<?= base_url('admin/prefixes/delete/' . $p['idPrefixes']) ?>"
+                                onclick="return confirm('Supprimer ?')">
+                                Supprimer
+                            </a>
+
+
+                        </td>
+
+                    </tr>
+
+
+                <?php endforeach; ?>
+
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+
+</body>
+
+</html>

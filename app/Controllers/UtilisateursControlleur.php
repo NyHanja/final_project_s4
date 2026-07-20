@@ -38,8 +38,10 @@ class UtilisateursControlleur extends BaseController
 
                     if ((int) $utilisateur['idRoles'] === 1) {
                         $operationModel = new \App\Models\OperationsModel();
-                        $data['gain'] = $operationModel->gain();
+                        $data['gains'] = $operationModel->gainParOperateur();
+
                         return view('admin/dashboard', $data);
+                        // return view('admin/dashboard', $data);
                     }
 
                     return view('client/dashboard');
