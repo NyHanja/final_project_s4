@@ -20,6 +20,11 @@
                     <a href="<?= base_url('admin/operations') ?>" class="text-white">Voir l'historique →</a>
                 </div>
             </div>
+                <div class="card bg-primary text-white p-3">
+                    <h3>Gain Total</h3>
+                    <p><?= number_format($gain, 2) ?> Ar</p>
+                </div>
+            </div>
             <div class="col-md-4">
                 <div class="card bg-success text-white p-3">
                     <h3>Grille Tarifaire</h3>

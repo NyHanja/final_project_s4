@@ -23,23 +23,28 @@ class UtilisateursControlleur extends BaseController
 
             $prefixeModel = new PrefixeModel();
             if (!$prefixeModel->validationPrefixes($numeroTelephone)) {
-                return view('utilisateurs/index', ['error' => 'Numéro de téléphone invalide.']);
-            }
-
-            $utilisateurModel = new UtilisateursModel();
-            $utilisateur = $utilisateurModel->where('numeroTelephone', $numeroTelephone)->first();
-
-            if ($utilisateur) {
-                $session = session();
-                $session->set([
-                    'idUtilisateur'   => $utilisateur['idUtilisateurs'],
-                    'numeroTelephone' => $utilisateur['numeroTelephone'],
-                    'idRoles'         => $utilisateur['idRoles'],
-                    'isLoggedIn'      => true,
-                ]);
-
-                if ((int) $utilisateur['idRoles'] === 1) {
-                    return view('admin/dashboard');
+                return view('utilisateurs/login', ['error' => 'Numéro de téléphone invalide.']);
+            } else {
+                $utilisateurModel = new \App\Models\UtilisateursModel();
+                $utilisateur = $utilisateurModel->where('numeroTelephone', $numeroTelephone)->first();
+                if ($utilisateur) {
+                    $session = session();
+                    $session->set([
+                        'idUtilisateur' => $utilisateur['idUtilisateurs'],
+                        'numeroTelephone' => $utilisateur['numeroTelephone'],
+                        'idRoles' => $utilisateur['idRoles'], 
+                        'isLoggedIn' => true
+                    ]);
+                    if($utilisateur['idRoles'] == 1){
+                        $operationModel = new \App\Models\OperationsModel();
+                        $data['gain'] = $operationModel->gain();
+                        return view('admin/dashboard', $data);
+                    } 
+                    else{
+                        return view('client/dashboard');
+                    }
+                } else {
+                    return view('utilisateurs/index', ['error' => 'Numéro de téléphone non trouvé.']);
                 }
 
                 return view('client/dashboard');

@@ -6,7 +6,9 @@ class AdminControlleur extends BaseController
 {
     public function dashboard(): string
     {
-        return view('admin/dashboard');
+        $operationModel = new \App\Models\OperationsModel();
+        $data['gain'] = $operationModel->gain();
+        return view('admin/dashboard', $data);
     }
 
     public function operations(): string
