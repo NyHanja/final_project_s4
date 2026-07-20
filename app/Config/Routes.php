@@ -49,4 +49,7 @@ $routes->group('client', ['filter' => 'role:2'], function ($routes) {
 
     $routes->get('transfert', 'OperationController::transfertForm');
     $routes->post('transfert', 'OperationController::transfert');
+
+    $routes->get('transfert-multiple', 'OperationController::transfertMultipleForm');
+    $routes->post('transfert-multiple', 'OperationController::transfertMultiple');
 });

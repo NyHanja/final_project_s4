@@ -25,4 +25,19 @@ class PrefixeModel extends Model
             return false;
         }
     }
+
+    public function getOperateurByNumero(string $numero): ?int
+    {
+        $prefixeValeur = substr($numero, 0, 3);
+
+        $prefixe = $this->where('valeur', $prefixeValeur)->first();
+
+        return $prefixe ? (int) $prefixe['idOperateurs'] : null;
+    }
+
+  
+    public function validationOperateurExiste(string $numero): bool
+    {
+        return $this->getOperateurByNumero($numero) !== null;
+    }
 }
