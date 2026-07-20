@@ -71,7 +71,7 @@ class OperationsModel extends Model
 
         return $fraisModel->totalGain($operations);
     }
-}
+
 
     public function getFrais(int $idTypesOperations, int $montant): int
     {
@@ -172,5 +172,6 @@ class OperationsModel extends Model
 
         return ['success' => true, 'message' => 'Transfert effectué avec succès.'];
     }
-}
 
+
+}
