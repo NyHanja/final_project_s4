@@ -9,8 +9,13 @@ class OperationsModel extends Model
     protected $table      = 'operations';
     protected $primaryKey = 'idOperations';
     protected $allowedFields = [
-        'montant', 'fraisAppliques', 'dateOperation',
-        'idTypesOperations', 'idSource', 'idDestinataire', 'idOperateurs',
+        'montant',
+        'fraisAppliques',
+        'dateOperation',
+        'idTypesOperations',
+        'idSource',
+        'idDestinataire',
+        'idOperateurs',
     ];
 
     /**
@@ -50,31 +55,33 @@ class OperationsModel extends Model
 
     public function getHistorique(int $idUtilisateur, array $filtres = []): array
     {
+        // Ajout de parenthèses strictes autour du OR pour isoler l'utilisateur connecté
         $sql = "
-        SELECT
-            operations.idOperations,
-            operations.montant,
-            operations.fraisAppliques,
-            operations.dateOperation,
-            operations.idTypesOperations,
-            typesOperations.libelle AS typeLibelle,
-            operations.idSource,
-            operations.idDestinataire,
-            CASE
-                WHEN operations.idDestinataire = ? THEN 'entrant'
-                ELSE 'sortant'
-            END AS sens,
-            src.numeroTelephone AS numeroSource,
-            dst.numeroTelephone AS numeroDestinataire
-        FROM operations
-        JOIN typesOperations ON typesOperations.idTypesOperations = operations.idTypesOperations
-        LEFT JOIN utilisateurs src ON src.idUtilisateurs = operations.idSource
-        LEFT JOIN utilisateurs dst ON dst.idUtilisateurs = operations.idDestinataire
-        WHERE (operations.idSource = ? OR operations.idDestinataire = ?)
-    ";
+    SELECT
+        operations.idOperations,
+        operations.montant,
+        operations.fraisAppliques,
+        operations.dateOperation,
+        operations.idTypesOperations,
+        typesOperations.libelle AS typeLibelle,
+        operations.idSource,
+        operations.idDestinataire,
+        CASE
+            WHEN operations.idDestinataire = ? THEN 'entrant'
+            ELSE 'sortant'
+        END AS sens,
+        src.numeroTelephone AS numeroSource,
+        dst.numeroTelephone AS numeroDestinataire
+    FROM operations
+    JOIN typesOperations ON typesOperations.idTypesOperations = operations.idTypesOperations
+    LEFT JOIN utilisateurs src ON src.idUtilisateurs = operations.idSource
+    LEFT JOIN utilisateurs dst ON dst.idUtilisateurs = operations.idDestinataire
+    WHERE (operations.idSource = ? OR operations.idDestinataire = ?)
+";
 
         $params = [$idUtilisateur, $idUtilisateur, $idUtilisateur];
 
+        // Les filtres s'appliqueront désormais STRICTEMENT à l'utilisateur connecté
         if (!empty($filtres['dateDebut'])) {
             $sql .= " AND date(operations.dateOperation) >= ? ";
             $params[] = $filtres['dateDebut'];
