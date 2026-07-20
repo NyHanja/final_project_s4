@@ -75,6 +75,11 @@ INSERT INTO utilisateurs
 VALUES 
 (4, '0331122334', 'Rakoto', 'Jean', 2);
 
+INSERT INTO utilisateurs (idUtilisateurs, numeroTelephone, nom, prenom, idRoles) VALUES 
+(5, '0332233445', 'Andria', 'Tahina', 2),
+(6, '0333344556', 'Razafy', 'Valisoa', 2),
+(7, '0334455667', 'Ramanandraibe', 'Fitiavana', 2);
+
 
 
 -- ============================
