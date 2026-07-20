@@ -66,3 +66,31 @@ VALUES ('0331122233', 'Rakoto', 'Jean', 1);
 -- Un client lambda (idRoles = 2)
 INSERT INTO utilisateurs (numeroTelephone, nom, prenom, idRoles) 
 VALUES ('0378899900', 'Randria', 'Anja', 2);
+
+-- Un deuxième client (idRoles = 2)
+INSERT INTO utilisateurs (numeroTelephone, nom, prenom, idRoles) 
+VALUES ('0330011223', 'Rabe', 'Marie', 2);
+
+INSERT INTO typesOperations (libelle) VALUES ('Depot');
+INSERT INTO typesOperations (libelle) VALUES ('Retrait');
+INSERT INTO typesOperations (libelle) VALUES ('Transfert');
+
+-- 1. Depot de 20 000 pour Randria (id 2)
+INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
+VALUES (20000, 0, '2026-07-20 08:00:00', 1, NULL, 2);
+
+-- 2. Retrait de 5 000, frais 200, pour Randria (id 2)
+INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
+VALUES (5000, 200, '2026-07-20 09:00:00', 2, 2, NULL);
+
+-- 3. Depot de 15 000 pour Rabe (id 3)
+INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
+VALUES (15000, 0, '2026-07-20 09:30:00', 1, NULL, 3);
+
+-- 4. Transfert de Rabe (id 3) vers Randria (id 2) : 4 000, frais 100
+INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
+VALUES (4000, 100, '2026-07-20 10:00:00', 3, 3, 2);
+
+-- 5. Transfert de Randria (id 2) vers Rabe (id 3) : 2 000, frais 50
+INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
+VALUES (2000, 50, '2026-07-20 11:00:00', 3, 2, 3);
