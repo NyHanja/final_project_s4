@@ -38,7 +38,7 @@ class OperationController extends BaseController
 
         $operationModel   = new \App\Models\OperationsModel();
         $utilisateurModel = new \App\Models\UtilisateursModel();
-        $typeModel        = new \App\Models\TypesOperationsModel(); // adapte le nom si différent
+        $typeModel        = new \App\Models\TypesOperationsModel();
 
         $filtres = [
             'dateDebut'         => $this->request->getGet('dateDebut'),
@@ -47,8 +47,10 @@ class OperationController extends BaseController
         ];
 
         $utilisateur = $utilisateurModel->find($idUtilisateur);
-        $historique  = $operationModel->getHistorique($idUtilisateur, array_filter($filtres));
-        $types       = $typeModel->findAll(); 
+        $historique  = $operationModel->getHistorique($idUtilisateur, array_filter($filtres, static function ($value) {
+            return $value !== null && $value !== '';
+        }));
+        $types       = $typeModel->findAll();
 
         return view('client/historique', [
             'utilisateur' => $utilisateur,
@@ -56,6 +58,11 @@ class OperationController extends BaseController
             'types'       => $types,
             'filtres'     => $filtres,
         ]);
+    }
+
+    public function depotForm()
+    {
+        return view('client/depot');
     }
 
     public function depot()
@@ -66,9 +73,13 @@ class OperationController extends BaseController
         }
 
         $montant = (int) $this->request->getPost('montant');
+        $dateOperation = $this->request->getPost('dateOperation');
+
+        if (empty($dateOperation)) {
+            $dateOperation = date('Y-m-d H:i:s');
+        }
 
         $operationModel = new \App\Models\OperationsModel();
-        $dateOperation = $this->request->getPost('dateOperation');
         $resultat = $operationModel->effectuerDepot($idUtilisateur, $montant, $dateOperation);
 
         return redirect()->to('/client/solde')->with(
@@ -89,16 +100,20 @@ class OperationController extends BaseController
             return redirect()->to('/login');
         }
 
-        $montant = (int) $this->request->getPost('montant');
+        try {
+            $montant = (int) $this->request->getPost('montant');
 
-        $operationModel = new \App\Models\OperationsModel();
-        $dateOperation = $this->request->getPost('dateOperation');
-        $resultat = $operationModel->effectuerRetrait($idUtilisateur, $montant, $dateOperation);
+            $operationModel = new \App\Models\OperationsModel();
+            $dateOperation = $this->request->getPost('dateOperation');
+            $resultat = $operationModel->effectuerRetrait($idUtilisateur, $montant, $dateOperation);
 
-        return redirect()->to('/client/solde')->with(
-            $resultat['success'] ? 'success' : 'error',
-            $resultat['message']
-        );
+            return redirect()->to('/client/solde')->with(
+                $resultat['success'] ? 'success' : 'error',
+                $resultat['message']
+            );
+        } catch (\RuntimeException $exception) {
+            return redirect()->to('/client/solde')->with('error', $exception->getMessage());
+        }
     }
 
     public function transfertForm()
@@ -113,16 +128,20 @@ class OperationController extends BaseController
             return redirect()->to('/login');
         }
 
-        $numeroDestinataire = $this->request->getPost('numeroTelephone');
-        $montant = (int) $this->request->getPost('montant');
+        try {
+            $numeroDestinataire = $this->request->getPost('numeroTelephone');
+            $montant = (int) $this->request->getPost('montant');
 
-        $operationModel = new \App\Models\OperationsModel();
-        $dateOperation = $this->request->getPost('dateOperation');
-        $resultat = $operationModel->effectuerTransfert($idUtilisateur, $numeroDestinataire, $montant, $dateOperation);
+            $operationModel = new \App\Models\OperationsModel();
+            $dateOperation = $this->request->getPost('dateOperation');
+            $resultat = $operationModel->effectuerTransfert($idUtilisateur, $numeroDestinataire, $montant, $dateOperation);
 
-        return redirect()->to('/client/solde')->with(
-            $resultat['success'] ? 'success' : 'error',
-            $resultat['message']
-        );
+            return redirect()->to('/client/solde')->with(
+                $resultat['success'] ? 'success' : 'error',
+                $resultat['message']
+            );
+        } catch (\RuntimeException $exception) {
+            return redirect()->to('/client/solde')->with('error', $exception->getMessage());
+        }
     }
 }

@@ -13,15 +13,32 @@ class OperationsModel extends Model
     public function getSolde(int $id): float
     {
         $db = \Config\Database::connect();
-        $sql = "SELECT
-            COALESCE(SUM(CASE WHEN idDestinataire = ? THEN montant ELSE 0 END), 0) -
-            COALESCE(SUM(CASE WHEN idSource = ? THEN montant + fraisAppliques ELSE 0 END), 0) AS solde
-            FROM operations
-            WHERE idDestinataire = ? OR idSource = ?";
+        $operations = $db->table('operations')
+            ->where('idDestinataire', $id)
+            ->orWhere('idSource', $id)
+            ->get()
+            ->getResultArray();
 
-        $query = $db->query($sql, [$id, $id, $id, $id]);
+        $solde = 0.0;
 
-        return (float) ($query->getRow()->solde ?? 0);
+        foreach ($operations as $operation) {
+            $montant = (float) ($operation['montant'] ?? 0);
+            $idSource = $operation['idSource'] ?? null;
+            $idDestinataire = $operation['idDestinataire'] ?? null;
+            $idTypeOperation = (int) ($operation['idTypesOperations'] ?? 0);
+
+            if ((int) $idDestinataire === $id) {
+                $solde += $montant;
+                continue;
+            }
+
+            if ((int) $idSource === $id) {
+                $frais = $this->getFrais($idTypeOperation, (int) $montant);
+                $solde -= $montant + $frais;
+            }
+        }
+
+        return (float) $solde;
     }
 
     public function getHistorique(int $idUtilisateur, array $filtres = []): array
@@ -77,8 +94,8 @@ class OperationsModel extends Model
     public function gain($date = null)
     {
         $builder = $this->select('fraisAppliques')
-            ->where('fraisAppliques IS NOT NULL')
-            ->where('idTypesOperations >', 1);
+            ->where('idTypesOperations >', 1)
+            ->where('fraisAppliques >=', 0);
 
         if ($date != null) {
             $builder->where('DATE(dateOperation)', $date);
@@ -86,9 +103,12 @@ class OperationsModel extends Model
 
         $operations = $builder->findAll();
 
-        $fraisModel = new FraisModel();
+        $total = 0;
+        foreach ($operations as $operation) {
+            $total += (int) ($operation['fraisAppliques'] ?? 0);
+        }
 
-        return $fraisModel->totalGain($operations);
+        return (float) $total;
     }
 
 
@@ -138,7 +158,7 @@ class OperationsModel extends Model
         $solde = $this->getSolde($idUtilisateur);
 
         if ($solde < $montant + $frais) {
-            return ['success' => false, 'message' => 'Solde insuffisant.'];
+            throw new \RuntimeException('Solde insuffisant pour effectuer ce retrait.');
         }
 
         $this->insert([
@@ -178,7 +198,7 @@ class OperationsModel extends Model
         $solde = $this->getSolde($idUtilisateurSource);
 
         if ($solde < $montant + $frais) {
-            return ['success' => false, 'message' => 'Solde insuffisant.'];
+            throw new \RuntimeException('Solde insuffisant pour effectuer ce transfert.');
         }
 
         $this->insert([

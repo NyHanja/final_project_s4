@@ -94,3 +94,31 @@ VALUES (4000, 100, '2026-07-20 10:00:00', 3, 3, 2);
 -- 5. Transfert de Randria (id 2) vers Rabe (id 3) : 2 000, frais 50
 INSERT INTO operations (montant, fraisAppliques, dateOperation, idTypesOperations, idSource, idDestinataire)
 VALUES (2000, 50, '2026-07-20 11:00:00', 3, 2, 3);
+
+-- ============================
+-- FRAIS - DEPOT (idTypesOperations = 1)
+-- En général gratuit pour inciter les gens à alimenter leur compte
+-- ============================
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (0, 999999999, 0, 1);
+
+-- ============================
+-- FRAIS - RETRAIT (idTypesOperations = 2)
+-- Barème par tranche de montant
+-- ============================
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (100, 5000, 100, 2);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (5001, 15000, 300, 2);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (15001, 50000, 700, 2);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (50001, 100000, 1200, 2);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (100001, 300000, 2500, 2);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (300001, 999999999, 5000, 2);
+
+-- ============================
+-- FRAIS - TRANSFERT (idTypesOperations = 3)
+-- Généralement moins cher que le retrait
+-- ============================
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (100, 5000, 50, 3);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (5001, 15000, 150, 3);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (15001, 50000, 400, 3);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (50001, 100000, 800, 3);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (100001, 300000, 1500, 3);
+INSERT INTO frais (montantMin, montantMax, valeurFrais, idTypesOperations) VALUES (300001, 999999999, 3000, 3);

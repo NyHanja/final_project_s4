@@ -10,6 +10,18 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="alert alert-success mb-3">
+                    <?= esc(session()->getFlashdata('success')) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger mb-3">
+                    <?= esc(session()->getFlashdata('error')) ?>
+                </div>
+            <?php endif; ?>
+
             <div class="card shadow-sm">
                 <div class="card-body text-center">
 
@@ -35,9 +47,7 @@
             </div>
 
             <div class="text-center mt-3">
-                <a href="/test/solde/1" class="btn btn-sm btn-outline-primary">Client A</a>
-                <a href="/test/solde/2" class="btn btn-sm btn-outline-primary">Client B</a>
-                <a href="/test/solde/3" class="btn btn-sm btn-outline-primary">Client C</a>
+                <a href="<?= base_url('client/dashboard') ?>" class="btn btn-outline-primary">Retour au tableau de bord</a>
             </div>
         </div>
     </div>

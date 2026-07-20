@@ -70,7 +70,7 @@
                         <td class="fw-bold"><?= number_format($op['montant'], 0, ',', ' ') ?> Ar</td>
                         <td class="text-danger"><?= number_format($op['fraisAppliques'], 0, ',', ' ') ?> Ar</td>
                         <td>
-                            <?php if ($op['idSource'] == session()->get('idUtilisateurs')): ?>
+                            <?php if ((int) ($op['idSource'] ?? 0) === (int) session()->get('idUtilisateur')): ?>
                                 <span class="badge bg-warning text-dark">Expéditeur</span>
                             <?php else: ?>
                                 <span class="badge bg-success">Bénéficiaire</span>
