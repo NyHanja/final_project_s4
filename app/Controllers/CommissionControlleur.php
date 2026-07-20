@@ -1,4 +1,4 @@
-git pull origin dev<?php
+<?php
 
 namespace App\Controllers;
 
