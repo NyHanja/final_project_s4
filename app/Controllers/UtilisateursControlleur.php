@@ -32,7 +32,9 @@ class UtilisateursControlleur extends BaseController
                         'isLoggedIn' => true
                     ]);
                     if($utilisateur['idRoles'] == 1){
-                        return view('admin/dashboard');
+                        $operationModel = new \App\Models\OperationsModel();
+                        $data['gain'] = $operationModel->gain();
+                        return view('admin/dashboard', $data);
                     } 
                     else{
                         return view('client/dashboard');

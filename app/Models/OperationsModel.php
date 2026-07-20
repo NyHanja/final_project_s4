@@ -1,8 +1,7 @@
 <?php
-
-use CodeIgniter\Model;
-
 namespace App\Models;
+use CodeIgniter\Model;
+use App\Models\FraisModel;
 
 class OperationsModel extends Model
 {
@@ -54,6 +53,25 @@ class OperationsModel extends Model
 
         return $query->getResultArray();
     }
+
+
+    public function gain($date = null)
+    {
+        $builder = $this->select('fraisAppliques')
+            ->where('fraisAppliques IS NOT NULL')
+            ->where('idTypesOperations >', 1);
+
+        if ($date != null) {
+            $builder->where('DATE(dateOperation)', $date);
+        }
+
+        $operations = $builder->findAll();
+
+        $fraisModel = new FraisModel();
+
+        return $fraisModel->totalGain($operations);
+    }
+}
 
     public function getFrais(int $idTypesOperations, int $montant): int
     {
@@ -155,3 +173,4 @@ class OperationsModel extends Model
         return ['success' => true, 'message' => 'Transfert effectué avec succès.'];
     }
 }
+
