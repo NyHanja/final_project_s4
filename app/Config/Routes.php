@@ -24,6 +24,16 @@ $routes->group('admin', ['filter' => 'role:1'], function ($routes) {
 
     $routes->get('prefixes/delete/(:num)', 'PrefixeControlleur::delete/$1');
 
+     $routes->get('commissions', 'CommissionControlleur::index');
+
+    $routes->get('commissions/create', 'CommissionControlleur::create');
+    $routes->post('commissions/store', 'CommissionControlleur::store');
+
+    $routes->get('commissions/edit/(:num)', 'CommissionControlleur::edit/$1');
+    $routes->post('commissions/update/(:num)', 'CommissionControlleur::update/$1');
+
+    $routes->get('commissions/delete/(:num)', 'CommissionControlleur::delete/$1');
+
 });
 $routes->group('client', ['filter' => 'role:2'], function ($routes) {
     $routes->get('dashboard', 'ClientControlleur::dashboard');
@@ -39,4 +49,7 @@ $routes->group('client', ['filter' => 'role:2'], function ($routes) {
 
     $routes->get('transfert', 'OperationController::transfertForm');
     $routes->post('transfert', 'OperationController::transfert');
+
+    $routes->get('transfert-multiple', 'OperationController::transfertMultipleForm');
+    $routes->post('transfert-multiple', 'OperationController::transfertMultiple');
 });

@@ -6,7 +6,14 @@ class PrefixeModel extends Model
 {
     protected $table = 'prefixes';
     protected $primaryKey = 'idPrefixes';
-    protected $allowedFields = ['valeur', 'operateur'];
+    protected $allowedFields = ['valeur', 'idOperateurs'];
+
+    public function listeWithOperateurs()
+    {
+        return $this->select('prefixes.*, operateurs.nom as operateur')
+                    ->join('operateurs', 'prefixes.idOperateurs = operateurs.idOperateurs', 'left')
+                    ->findAll();
+    }
 
     public function validationPrefixes($numeroTelephone){
         $prefixe = substr($numeroTelephone, 0, 3);
@@ -17,5 +24,20 @@ class PrefixeModel extends Model
         } else {
             return false;
         }
+    }
+
+    public function getOperateurByNumero(string $numero): ?int
+    {
+        $prefixeValeur = substr($numero, 0, 3);
+
+        $prefixe = $this->where('valeur', $prefixeValeur)->first();
+
+        return $prefixe ? (int) $prefixe['idOperateurs'] : null;
+    }
+
+  
+    public function validationOperateurExiste(string $numero): bool
+    {
+        return $this->getOperateurByNumero($numero) !== null;
     }
 }

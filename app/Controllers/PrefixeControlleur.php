@@ -18,14 +18,17 @@ class PrefixeControlleur extends BaseController
     public function index()
     {
         return view('admin/prefixes/index', [
-            'prefixes' => $this->prefixeModel->findAll()
+            'prefixes' => $this->prefixeModel->listeWithOperateurs()
         ]);
     }
 
 
     public function create()
     {
-        return view('admin/prefixes/create');
+        $operateursModel = new \App\Models\OperateursModel();
+        return view('admin/prefixes/create', [
+            'operateurs' => $operateursModel->findAll()
+        ]);
     }
 
 
@@ -33,7 +36,7 @@ class PrefixeControlleur extends BaseController
     {
         $this->prefixeModel->save([
             'valeur' => $this->request->getPost('valeur'),
-            'operateur' => $this->request->getPost('operateur')
+            'idOperateurs' => $this->request->getPost('idOperateurs')
         ]);
 
         return redirect()->to('/admin/prefixes');
@@ -42,8 +45,12 @@ class PrefixeControlleur extends BaseController
 
     public function edit($id)
     {
+        $operateursModel = new \App\Models\OperateursModel();
         return view('admin/prefixes/edit', [
-            'prefixe' => $this->prefixeModel->find($id)
+            'prefixe' => $this->prefixeModel->select('prefixes.*, operateurs.nom as operateur')
+                                            ->join('operateurs', 'prefixes.idOperateurs = operateurs.idOperateurs', 'left')
+                                            ->find($id),
+            'operateurs' => $operateursModel->findAll()
         ]);
     }
 
