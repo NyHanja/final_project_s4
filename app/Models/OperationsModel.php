@@ -241,7 +241,7 @@ class OperationsModel extends Model
 
                     }
                     else {
-                        $gains[1]['gain'] += frais;
+                        $gains[1]['gain'] += $frais;
                     }
 
                 }
