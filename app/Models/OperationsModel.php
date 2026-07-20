@@ -84,7 +84,6 @@ class OperationsModel extends Model
         if ($destinataire['idOperateurs'] == $monOperateur) {
 
             return $frais;
-
         }
 
 
@@ -156,8 +155,8 @@ class OperationsModel extends Model
     }
 
 
-
     public function gain($date = null): float
+    {
 
         $builder = $this->whereIn('idTypesOperations', [2, 3]);
 
@@ -189,19 +188,23 @@ class OperationsModel extends Model
 
         $operations = $builder->findAll();
 
-   
         $monOperateur = 1;
 
-        $gains = [];
+        // FIX : On initialise l'opérateur principal (1) pour éviter l'erreur "Undefined array key 1"
+        $gains = [
+            $monOperateur => [
+                'operateur' => 'Mon Opérateur', // Vous pouvez remplacer par le vrai nom (ex: Orange, Airtel...)
+                'gain' => 0
+            ]
+        ];
 
         foreach ($operations as $operation) {
-
             $gain = 0;
             $idOperateur = null;
             $nomOperateur = "";
+            $frais = (float)($operation['fraisAppliques'] ?? 0);
 
-            if (!empty($operation['idDestinataire']) ) {
-
+            if (!empty($operation['idDestinataire'])) {
                 $destinataire = $db->table('utilisateurs u')
                     ->select('o.idOperateurs, o.nom')
                     ->join('prefixes p', "SUBSTR(u.numeroTelephone,1,3)=p.valeur")
@@ -211,15 +214,10 @@ class OperationsModel extends Model
                     ->getRowArray();
 
                 if ($destinataire) {
-
                     $idOperateur = $destinataire['idOperateurs'];
                     $nomOperateur = $destinataire['nom'];
-                    $frais = $operation['fraisAppliques'];
 
                     if ($idOperateur != $monOperateur) {
-
-                       
-
                         $commission = $db->table('commissions')
                             ->where('idOperateurs', $idOperateur)
                             ->get()
@@ -230,28 +228,27 @@ class OperationsModel extends Model
                         }
                     }
 
+                    // Initialisation dynamique pour les AUTRES opérateurs partenaires
                     if (!isset($gains[$idOperateur])) {
                         $gains[$idOperateur] = [
                             'operateur' => $nomOperateur,
                             'gain' => 0
                         ];
                     }
-                    if($idOperateur !=1){
+
+                    if ($idOperateur != $monOperateur) {
                         $gains[$idOperateur]['gain'] += $gain;
-
                     }
-                    else {
-                        $gains[1]['gain'] += $frais;
-                    }
-
                 }
             }
+
+            // Plus aucun risque de plantage ici car $gains[1] est déjà initialisé
+            $gains[$monOperateur]['gain'] += $frais;
         }
 
-        // Retourner les gains par opérateur
+        // Retourner les gains sous forme de tableau indexé
         return array_values($gains);
     }
-
     public function getFrais(int $idTypesOperations, int $montant): int
     {
         $db = \Config\Database::connect();
