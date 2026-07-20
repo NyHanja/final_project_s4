@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 use CodeIgniter\Model;
 use App\Models\FraisModel;
@@ -55,6 +54,7 @@ class OperationsModel extends Model
         return $query->getResultArray();
     }
 
+
     public function gain($date = null)
     {
         $builder = $this->select('fraisAppliques')
@@ -72,3 +72,105 @@ class OperationsModel extends Model
         return $fraisModel->totalGain($operations);
     }
 }
+
+    public function getFrais(int $idTypesOperations, int $montant): int
+    {
+        $db = \Config\Database::connect();
+
+        $frais = $db->table('frais')
+            ->where('idTypesOperations', $idTypesOperations)
+            ->where('montantMin <=', $montant)
+            ->where('montantMax >=', $montant)
+            ->get()
+            ->getRow();
+
+        return $frais ? (int) $frais->valeurFrais : 0;
+    }
+
+    public function effectuerDepot(int $idUtilisateur, int $montant, string $dateOperation): array
+    {
+        if ($montant <= 0) {
+            return ['success' => false, 'message' => 'Montant invalide.'];
+        }
+
+        $idTypeDepot = 1;
+
+        $this->insert([
+            'montant'           => $montant,
+            'fraisAppliques'    => 0, 
+            'dateOperation'     => $dateOperation,
+            'idTypesOperations' => $idTypeDepot,
+            'idSource'          => null,
+            'idDestinataire'    => $idUtilisateur,
+        ]);
+
+        return ['success' => true, 'message' => 'Dépôt effectué avec succès.'];
+    }
+
+
+    public function effectuerRetrait(int $idUtilisateur, int $montant, string $dateOperation): array
+    {
+        if ($montant <= 0) {
+            return ['success' => false, 'message' => 'Montant invalide.'];
+        }
+
+        $idTypeRetrait = 2;
+
+        $frais = $this->getFrais($idTypeRetrait, $montant);
+        $solde = $this->getSolde($idUtilisateur);
+
+        if ($solde < $montant + $frais) {
+            return ['success' => false, 'message' => 'Solde insuffisant.'];
+        }
+
+        $this->insert([
+            'montant'           => $montant,
+            'fraisAppliques'    => $frais,
+            'dateOperation'     => $dateOperation,
+            'idTypesOperations' => $idTypeRetrait,
+            'idSource'          => $idUtilisateur,
+            'idDestinataire'    => null,
+        ]);
+
+        return ['success' => true, 'message' => 'Retrait effectué avec succès.'];
+    }
+
+    public function effectuerTransfert(int $idUtilisateurSource, string $numeroDestinataire, int $montant, string $dateOperation): array
+    {
+        if ($montant <= 0) {
+            return ['success' => false, 'message' => 'Montant invalide.'];
+        }
+
+        $utilisateurModel = new \App\Models\UtilisateursModel();
+        $destinataire = $utilisateurModel->where('numeroTelephone', $numeroDestinataire)->first();
+
+        if (!$destinataire) {
+            return ['success' => false, 'message' => 'Destinataire introuvable.'];
+        }
+
+        if ($destinataire->idUtilisateurs == $idUtilisateurSource) {
+            return ['success' => false, 'message' => 'Impossible de vous transférer à vous-même.'];
+        }
+
+        $idTypeTransfert = 3;
+
+        $frais = $this->getFrais($idTypeTransfert, $montant);
+        $solde = $this->getSolde($idUtilisateurSource);
+
+        if ($solde < $montant + $frais) {
+            return ['success' => false, 'message' => 'Solde insuffisant.'];
+        }
+
+        $this->insert([
+            'montant'           => $montant,
+            'fraisAppliques'    => $frais,
+            'dateOperation'     => $dateOperation,
+            'idTypesOperations' => $idTypeTransfert,
+            'idSource'          => $idUtilisateurSource,
+            'idDestinataire'    => $destinataire->idUtilisateurs,
+        ]);
+
+        return ['success' => true, 'message' => 'Transfert effectué avec succès.'];
+    }
+}
+

@@ -32,6 +32,13 @@
                     <button class="btn btn-success mt-auto" disabled>Bientôt disponible</button>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="card h-100 p-4 border-start border-primary border-4 shadow-sm">
+                    <h4>Voir mon solde</h4>
+                    <p class="text-muted">Consultez l'historique complet de vos dépôts, retraits et transferts.</p>
+                    <a href="<?= base_url('client/solde') ?>" class="btn btn-primary mt-auto">Voir mon solde</a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
