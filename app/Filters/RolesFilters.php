@@ -6,7 +6,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class RoleFilter implements FilterInterface
+class RolesFilters implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
