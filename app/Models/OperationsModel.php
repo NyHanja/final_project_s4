@@ -1,9 +1,9 @@
 <?php 
 
-use CodeIgniter\Models;
+use CodeIgniter\Model;
 namespace App\Models;
 
-class OperationsModel extends Models
+class OperationsModel extends Model
 {
     protected $table = 'operations';
     protected $primaryKey = 'idOperations';
