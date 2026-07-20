@@ -1,14 +1,15 @@
-<?php 
+<?php
 
-use CodeIgniter\Model;
 namespace App\Models;
+use CodeIgniter\Model;
+use App\Models\FraisModel;
 
 class OperationsModel extends Model
 {
     protected $table = 'operations';
     protected $primaryKey = 'idOperations';
     protected $allowedFields = ['montant', 'fraisAppliques', 'dateOperation', 'idTypesOperations', 'idSource', 'idDestinataire'];
-    
+
 
     public function getSolde(int $id): float
     {
@@ -52,5 +53,22 @@ class OperationsModel extends Model
         $query = $this->$db->query($sql, [$idUtilisateur, $idUtilisateur, $idUtilisateur]);
 
         return $query->getResultArray();
+    }
+
+    public function gain($date = null)
+    {
+        $builder = $this->select('fraisAppliques')
+            ->where('fraisAppliques IS NOT NULL')
+            ->where('idTypesOperations >', 1);
+
+        if ($date != null) {
+            $builder->where('DATE(dateOperation)', $date);
+        }
+
+        $operations = $builder->findAll();
+
+        $fraisModel = new FraisModel();
+
+        return $fraisModel->totalGain($operations);
     }
 }
