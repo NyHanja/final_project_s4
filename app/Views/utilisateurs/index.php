@@ -1,10 +1,4 @@
-<?php
-    echo WRITEPATH . 'database.db';
-    echo '<br>';
 
-    var_dump(file_exists(WRITEPATH . 'database.db'));
-
-?>
 
 <!DOCTYPE html>
 <html lang="fr">
