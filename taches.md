@@ -13,5 +13,3 @@
     - depot : augmente le solde
     - retrait: diminue le solde + calcul frais
     - transfert: retirer chez A + ajouter chez B + calcul frais
-
-- historisation des actions
