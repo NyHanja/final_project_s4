@@ -23,7 +23,7 @@ class UtilisateursControlleur extends BaseController
 
             $prefixeModel = new PrefixeModel();
             if (!$prefixeModel->validationPrefixes($numeroTelephone)) {
-                return view('utilisateurs/login', ['error' => 'Numéro de téléphone invalide.']);
+                return view('utilisateurs/index', ['error' => 'Numéro de téléphone invalide.']);
             } else {
                 $utilisateurModel = new \App\Models\UtilisateursModel();
                 $utilisateur = $utilisateurModel->where('numeroTelephone', $numeroTelephone)->first();

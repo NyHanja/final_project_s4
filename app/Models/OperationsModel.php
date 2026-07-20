@@ -3,7 +3,6 @@ namespace App\Models;
 use CodeIgniter\Model;
 use App\Models\FraisModel;
 
-use CodeIgniter\Model;
 
 class OperationsModel extends Model
 {
@@ -91,7 +90,7 @@ class OperationsModel extends Model
 
         return $fraisModel->totalGain($operations);
     }
-}
+
 
     public function getFrais(int $idTypesOperations, int $montant): int
     {
