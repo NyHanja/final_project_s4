@@ -6,38 +6,25 @@
     <title>Faire un Dépôt - Mobile Money</title>
     <!-- Inclusion de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Inclusion des icônes Google -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-    </style>
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
 
     <!-- Bouton Retour -->
-    <div class="mb-4">
-        <a href="<?= base_url('client/dashboard') ?>" class="btn btn-secondary btn-sm d-inline-flex align-items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span> 
-            Retour au tableau de bord
-        </a>
-    </div>
+    <a href="<?= base_url('client/dashboard') ?>" class="back-link">← Retour au tableau de bord</a>
 
     <!-- En-tête -->
     <header class="mb-4">
-        <h2 class="text-warning fw-bold">Faire un Dépôt</h2>
+        <div class="eyebrow">Espace client</div>
+        <h2>Faire un Dépôt</h2>
         <p class="text-muted">
             Approvisionnez instantanément votre compte Mobile Money. Aucun frais n'est appliqué sur les dépôts.
         </p>
     </header>
 
     <!-- Formulaire autonome -->
-    <div class="card glass-card p-4 shadow-sm rounded-3" style="max-width: 450px;">
+    <div class="card p-4 shadow-sm rounded-3" style="max-width: 450px;">
         <form method="post" action="<?= base_url('client/depot') ?>">
             <?= csrf_field() ?>
 
@@ -55,8 +42,7 @@
             </div>
 
             <!-- Bouton Valider -->
-            <button type="submit" class="btn btn-warning text-dark btn-lg w-100 d-flex align-items-center justify-content-center gap-2 fw-bold">
-                <span class="material-symbols-outlined">payments</span>
+            <button type="submit" class="btn btn-warning text-dark btn-lg w-100 fw-bold">
                 Confirmer le dépôt
             </button>
         </form>

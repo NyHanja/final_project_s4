@@ -4,40 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Envoi Multiple - Mobile Money</title>
-    <!-- Inclusion de Bootstrap (identique au dashboard) -->
+    <!-- Inclusion de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Inclusion des icônes Google -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-    </style>
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
 
     <!-- Bouton Retour -->
-    <div class="mb-4">
-        <a href="<?= base_url('client/transfert') ?>" class="btn btn-secondary btn-sm d-inline-flex align-items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span> 
-            Retour au transfert simple
-        </a>
-    </div>
+    <a href="<?= base_url('client/transfert') ?>" class="back-link">← Retour au transfert simple</a>
 
     <!-- En-tête -->
     <header class="mb-4">
-        <h2 class="text-primary fw-bold">Envoi multiple</h2>
+        <div class="eyebrow">Espace client</div>
+        <h2>Envoi multiple</h2>
         <p class="text-muted">
             Le montant total est divisé équitablement entre tous les numéros. Réservé aux numéros de notre réseau.
         </p>
     </header>
 
     <!-- Formulaire autonome -->
-    <div class="card glass-card p-4 shadow-sm rounded-3" style="max-width: 500px;">
+    <div class="card p-4 shadow-sm rounded-3" style="max-width: 500px;">
         <form method="post" action="<?= base_url('client/transfert-multiple') ?>" id="formMultiple">
             <?= csrf_field() ?>
 
@@ -57,23 +44,18 @@
                     <!-- Numéro 1 -->
                     <div class="d-flex gap-2 numero-ligne">
                         <input type="text" name="numeros[]" required class="form-control" placeholder="033 12 345 67">
-                        <button type="button" class="btn btn-outline-danger btn-supprimer-numero d-flex align-items-center justify-content-center" style="width: 40px;" title="Retirer">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
-                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-supprimer-numero" style="width: 40px;" title="Retirer">&times;</button>
                     </div>
                     <!-- Numéro 2 -->
                     <div class="d-flex gap-2 numero-ligne">
                         <input type="text" name="numeros[]" required class="form-control" placeholder="037 98 765 43">
-                        <button type="button" class="btn btn-outline-danger btn-supprimer-numero d-flex align-items-center justify-content-center" style="width: 40px;" title="Retirer">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
-                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-supprimer-numero" style="width: 40px;" title="Retirer">&times;</button>
                     </div>
                 </div>
 
                 <!-- Bouton ajouter -->
-                <button type="button" id="btnAjouterNumero" class="btn btn-link btn-sm p-0 mt-2 text-decoration-none d-flex align-items-center gap-1">
-                    <span class="material-symbols-outlined" style="font-size: 18px;">add_circle</span>
-                    Ajouter un numéro
+                <button type="button" id="btnAjouterNumero" class="btn btn-link btn-sm p-0 mt-2 text-decoration-none">
+                    + Ajouter un numéro
                 </button>
             </div>
 
@@ -92,8 +74,7 @@
             </div>
 
             <!-- Bouton envoyer -->
-            <button type="submit" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center gap-2">
-                <span class="material-symbols-outlined">group_add</span>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
                 Envoyer à tous
             </button>
         </form>
@@ -101,7 +82,7 @@
 
 </div>
 
-<!-- Votre script dynamique adapté à Bootstrap -->
+<!-- Script dynamique -->
 <script>
 (function () {
     const listeNumeros   = document.getElementById('listeNumeros');
@@ -114,9 +95,7 @@
         ligne.className = 'd-flex gap-2 numero-ligne';
         ligne.innerHTML = `
             <input type="text" name="numeros[]" required class="form-control" placeholder="033 12 345 67">
-            <button type="button" class="btn btn-outline-danger btn-supprimer-numero d-flex align-items-center justify-content-center" style="width: 40px;" title="Retirer">
-                <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
-            </button>
+            <button type="button" class="btn btn-outline-danger btn-supprimer-numero" style="width: 40px;" title="Retirer">&times;</button>
         `;
         return ligne;
     }

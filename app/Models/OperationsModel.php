@@ -340,13 +340,7 @@ class OperationsModel extends Model
         return ['success' => true, 'message' => 'Retrait effectué avec succès.'];
     }
 
-    /**
-     * Transfert : gère le même opérateur (avec option frais de retrait) et l'autre opérateur (non crédité pour l'instant)
-     *
-     * @param int|null $fraisTransfertOverride Si fourni, remplace le calcul automatique du frais de transfert.
-     *                                          Utilisé par effectuerTransfertMultiple() pour répartir un frais
-     *                                          calculé une seule fois sur le montant total.
-     */
+
     public function effectuerTransfert(
         int $idUtilisateurSource,
         string $numeroDestinataire,
@@ -388,17 +382,17 @@ class OperationsModel extends Model
             return ['success' => false, 'message' => 'Destinataire introuvable.'];
         }
 
-        $idTypeTransfert = 3; // adapte selon ta table typesOperations
+        $idTypeTransfert = 3;
         $idTypeRetrait   = 2;
 
-        // Le frais de transfert peut être imposé de l'extérieur (envoi multiple = calculé sur le total)
+        // 1. Calcul des frais
         $fraisTransfert = $fraisTransfertOverride ?? $this->getFrais($idTypeTransfert, $montant);
 
-        // Le frais de retrait, lui, est TOUJOURS calculé sur le montant réellement reçu par ce destinataire
         $fraisRetrait = ($inclureFraisRetrait && $estMemeOperateur)
             ? $this->getFrais($idTypeRetrait, $montant)
             : 0;
 
+        // 2. Le total réel à vérifier et déduire de l'expéditeur
         $totalDebite = $montant + $fraisTransfert + $fraisRetrait;
 
         $solde = $this->getSolde($idUtilisateurSource);
@@ -406,13 +400,11 @@ class OperationsModel extends Model
             return ['success' => false, 'message' => 'Solde insuffisant.'];
         }
 
-        $montantEnregistre    = $estMemeOperateur ? ($montant + $fraisRetrait) : $montant;
         $idDestinataireInsert = $estMemeOperateur ? (int) $destinataire['idUtilisateurs'] : null;
         $idOperateurInsert    = $estMemeOperateur ? $idOperateurSource : $idOperateurDestinataire;
 
         $this->insert([
-
-            'montant'           => $montantEnregistre,
+            'montant'           => $montant,
             'fraisAppliques'    => $fraisTransfert + $fraisRetrait,
             'dateOperation'     => date('Y-m-d H:i:s'),
             'idTypesOperations' => $idTypeTransfert,
@@ -428,15 +420,6 @@ class OperationsModel extends Model
         return ['success' => true, 'message' => $message];
     }
 
-    /**
-     * Envoi multiple : divise montantTotal entre plusieurs numéros, uniquement même opérateur.
-     *
-     * Frais de transfert : calculé UNE SEULE FOIS sur montantTotal, puis réparti entre les lignes
-     * d'opérations (le dernier destinataire absorbe le reste de la division entière, pour que la
-     * somme des frais enregistrés corresponde exactement au frais réellement facturé).
-     *
-     * Frais de retrait (optionnel) : calculé individuellement sur le montant divisé de chaque destinataire.
-     */
     public function effectuerTransfertMultiple(int $idUtilisateurSource, array $numeros, int $montantTotal, bool $inclureFraisRetrait = false): array
     {
         $numeros = array_values(array_unique(array_filter($numeros)));

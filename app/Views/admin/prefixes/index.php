@@ -4,21 +4,28 @@
 <head>
     <title>Gestion des préfixes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body>
 
-    <div class="container mt-5">
+    <div class="container py-5">
 
+        <a href="<?= base_url('admin/dashboard') ?>" class="back-link">← Retour au tableau de bord</a>
 
-        <h2>Gestion des préfixes opérateurs</h2>
+        <div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <div class="eyebrow">Administration</div>
+                <h2 class="mb-0">Gestion des préfixes opérateurs</h2>
+            </div>
 
-        <a href="<?= base_url('admin/prefixes/create') ?>" class="btn btn-primary mb-3">
-            Ajouter un préfixe
-        </a>
+            <a href="<?= base_url('admin/prefixes/create') ?>" class="btn btn-primary">
+                Ajouter un préfixe
+            </a>
+        </div>
 
-
-        <table class="table table-bordered bg-white">
+        <div class="card p-4 shadow-sm">
+        <table class="table table-bordered mb-0">
 
             <thead>
                 <tr>
@@ -71,6 +78,7 @@
             </tbody>
 
         </table>
+        </div>
 
 
     </div>

@@ -3,11 +3,15 @@
 <head>
     <title>Modifier une Commission</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <h2>Modifier une Commission</h2>
+<body>
+    <div class="container py-5">
+        <a href="<?= base_url('admin/commissions') ?>" class="back-link">← Retour aux commissions</a>
+        <div class="eyebrow">Administration</div>
+        <h2 class="mb-4">Modifier une Commission</h2>
 
+        <div class="card p-4 shadow-sm" style="max-width: 480px;">
         <form method="post" action="<?= base_url('admin/commisions/update/' . $commission['idCommissions']) ?>">
             <div class="mb-3">
                 <label class="form-label">Opérateur</label>
@@ -36,6 +40,7 @@
             <button type="submit" class="btn btn-success">Modifier</button>
             <a href="<?= base_url('admin/commissions') ?>" class="btn btn-secondary">Annuler</a>
         </form>
+        </div>
     </div>
 </body>
 </html>
