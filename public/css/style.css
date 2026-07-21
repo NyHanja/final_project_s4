@@ -1,0 +1,412 @@
+/* ==========================================================================
+   Mobile Money — Feuille de style principale
+   Palette sobre, typographie soignée, composants Bootstrap harmonisés.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --brand-900: #0f1b3d;
+    --brand-800: #16224f;
+    --brand-700: #1d2f6b;
+    --brand-600: #26398c;
+    --brand-500: #2f46ad;
+    --brand-100: #e7ebfb;
+
+    --accent: #2f46ad;
+    --accent-dark: #1d2f6b;
+
+    --success: #12805c;
+    --success-dark: #0b5e43;
+    --danger: #b3261e;
+    --warning: #a35b00;
+    --info: #0b6e99;
+
+    --ink-900: #131722;
+    --ink-700: #384157;
+    --ink-500: #667085;
+    --ink-300: #d0d5dd;
+    --ink-100: #eef1f6;
+
+    --surface: #ffffff;
+    --surface-muted: #f5f7fb;
+    --border: #e2e6ef;
+
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--surface-muted);
+    color: var(--ink-900);
+    font-size: 0.975rem;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink-900);
+}
+
+.text-muted {
+    color: var(--ink-500) !important;
+}
+
+a {
+    color: var(--accent);
+}
+
+a:hover {
+    color: var(--accent-dark);
+}
+
+/* --------------------------------------------------------------------------
+   Layout helpers
+   -------------------------------------------------------------------------- */
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+}
+
+.page-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.25rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-700);
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Cards
+   -------------------------------------------------------------------------- */
+
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.card.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.action-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.action-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.action-card h4 {
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+}
+
+.action-card p {
+    font-size: 0.88rem;
+}
+
+.summary-card {
+    background: var(--brand-900);
+    background-image: linear-gradient(135deg, var(--brand-900), var(--brand-700));
+    color: #fff;
+    border: none;
+}
+
+.summary-card .text-muted {
+    color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.stat-card {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.stat-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-800);
+}
+
+.stat-card .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-500);
+    font-weight: 700;
+}
+
+/* Accent bar used instead of colored left borders per section */
+.accent-bar {
+    border-left: 3px solid var(--accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons — muted the default Bootstrap palette toward the brand tones
+   -------------------------------------------------------------------------- */
+
+.btn {
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.01em;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
+
+.btn-outline-primary {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: var(--success-dark);
+    border-color: var(--success-dark);
+}
+
+.btn-info {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: #084e6f;
+    border-color: #084e6f;
+    color: #fff;
+}
+
+.btn-warning {
+    background-color: #b5720a;
+    border-color: #b5720a;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #8f5807;
+    border-color: #8f5807;
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-danger:hover {
+    background-color: #8f1e18;
+    border-color: #8f1e18;
+}
+
+.btn-secondary,
+.btn-outline-secondary {
+    color: var(--ink-700);
+}
+
+.btn-secondary {
+    background-color: var(--ink-100);
+    border-color: var(--ink-300);
+    color: var(--ink-700);
+}
+
+.btn-secondary:hover {
+    background-color: var(--ink-300);
+    color: var(--ink-900);
+}
+
+/* --------------------------------------------------------------------------
+   Forms
+   -------------------------------------------------------------------------- */
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ink-700);
+}
+
+.form-control,
+.form-select {
+    border-radius: var(--radius-sm);
+    border-color: var(--ink-300);
+    padding: 0.55rem 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.2rem rgba(47, 70, 173, 0.15);
+}
+
+.form-control-lg {
+    border-radius: var(--radius-sm);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+
+.table {
+    --bs-table-bg: transparent;
+    font-size: 0.9rem;
+}
+
+.table thead th {
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--ink-500);
+    background-color: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.table td {
+    vertical-align: middle;
+    color: var(--ink-900);
+}
+
+.table-dark thead th {
+    background-color: var(--brand-900);
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   Badges
+   -------------------------------------------------------------------------- */
+
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   Alerts
+   -------------------------------------------------------------------------- */
+
+.alert {
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Auth page (login)
+   -------------------------------------------------------------------------- */
+
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-900);
+    background-image: linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 60%, var(--brand-600) 100%);
+    padding: 1.5rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 2.25rem 2rem;
+}
+
+.auth-card .brand-mark {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.auth-card h2 {
+    text-align: center;
+    font-size: 1.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.auth-card .subtitle {
+    text-align: center;
+    color: var(--ink-500);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Utility overrides
+   -------------------------------------------------------------------------- */
+
+.rounded-3 {
+    border-radius: var(--radius) !important;
+}
+
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.list-group-item {
+    border-color: var(--border);
+}

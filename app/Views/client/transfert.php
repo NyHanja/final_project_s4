@@ -4,36 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faire un Transfert - Mobile Money</title>
-    <!-- Inclusion de Bootstrap (comme sur votre dashboard) -->
+    <!-- Inclusion de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Inclusion des icônes Google si vous les utilisez -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    
-    <style>
-        /* Vos styles personnalisés si nécessaire */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-    </style>
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-5">
 
     <!-- Bouton Retour -->
-    <div class="mb-4">
-        <a href="<?= base_url('client/dashboard') ?>" class="btn btn-secondary btn-sm">← Retour au Tableau de bord</a>
-    </div>
+    <a href="<?= base_url('client/dashboard') ?>" class="back-link">← Retour au tableau de bord</a>
 
     <!-- En-tête de la page -->
     <header class="mb-4">
-        <h2 class="text-primary fw-bold">Faire un transfert</h2>
+        <div class="eyebrow">Espace client</div>
+        <h2>Faire un transfert</h2>
         <p class="text-muted">Envoyez de l'argent vers un autre numéro Mobile Money.</p>
     </header>
 
-    <!-- Formulaire (Adapté en classes Bootstrap pour correspondre à votre style indépendant) -->
-    <div class="card glass-card p-4 shadow-sm rounded-3" style="max-width: 500px;">
+    <!-- Formulaire -->
+    <div class="card p-4 shadow-sm rounded-3" style="max-width: 500px;">
         <form method="post" action="<?= base_url('client/transfert') ?>">
             <?= csrf_field() ?>
 
@@ -61,15 +50,13 @@
             </div>
 
             <!-- Bouton de soumission -->
-            <button type="submit" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center gap-2">
-                <span class="material-symbols-outlined">swap_horiz</span>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
                 Transférer
             </button>
         </form>
 
         <!-- Lien transfert multiple -->
-        <a href="<?= base_url('client/transfert-multiple') ?>" class="btn btn-outline-secondary btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
-            <span class="material-symbols-outlined" style="font-size: 18px;">group_add</span>
+        <a href="<?= base_url('client/transfert-multiple') ?>" class="btn btn-outline-secondary btn-sm w-100 mt-3">
             Envoyer à plusieurs numéros
         </a>
     </div>

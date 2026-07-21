@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Mon solde - Mobile Money</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
 <div class="container py-5">
     <div class="row justify-content-center">
