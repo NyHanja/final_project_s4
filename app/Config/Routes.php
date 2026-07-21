@@ -52,4 +52,7 @@ $routes->group('client', ['filter' => 'role:2'], function ($routes) {
 
     $routes->get('transfert-multiple', 'OperationController::transfertMultipleForm');
     $routes->post('transfert-multiple', 'OperationController::transfertMultiple');
+
+    $routes->get('conf','ConfigEpargnesControlleur::index');
+    $routes->post('conf','ConfigEpargnesControlleur::save');
 });

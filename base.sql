@@ -61,3 +61,22 @@ CREATE TABLE commissions(
     idOperateurs INTEGER,
     FOREIGN KEY (idOperateurs) REFERENCES operateurs(idOperateurs)
 );
+
+CREATE TABLE config_frais(
+    idConfig_frais INTEGER PRIMARY KEY,
+    pourcentage INTEGER NOT NULL
+);
+
+
+CREATE TABLE configEpargnes(
+    idConfigEpargnes INTEGER PRIMARY KEY,
+    idUtilisateur INTEGER NOT NULL,
+    pourcentage INTEGER Not NULL
+);
+CREATE TABLE compteEpargnes(
+    idEpargnes INTEGER PRIMARY KEY,
+    montant INTEGER NOT NULL,
+    idUtilisateurs INTEGER,
+    FOREIGN KEY (idUtilisateurs) REFERENCES utilisateurs(idUtilisateurs)
+);
+

@@ -94,6 +94,7 @@
             </div>
         </div>
     </div>
+    <a href="<?= base_url('client/conf') ?>">conf</a>
 </div>
 </body>
 </html>
