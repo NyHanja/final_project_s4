@@ -7,7 +7,34 @@
     <title>Dashboard Admin - Mobile Money</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        .dashboard-card {
+            border-radius: 15px;
+            transition: transform 0.2s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .gain-card {
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white;
+        }
+
+        .operator-card {
+            border-left: 5px solid #198754;
+        }
+
+        .title {
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,12 +42,11 @@
     <div class="container py-5">
 
         <!-- HEADER -->
-        <div class="card p-4 shadow-sm mb-4">
+        <div class="card p-4 shadow-sm mb-4 dashboard-card">
             <div class="d-flex justify-content-between align-items-center">
 
                 <div>
-                    <div class="eyebrow">Espace administrateur</div>
-                    <h2 class="mb-0">
+                    <h2 class="title">
                         Tableau de bord administrateur
                     </h2>
 
@@ -44,7 +70,7 @@
 
             <!-- OPERATIONS -->
             <div class="col-md-4">
-                <div class="card action-card h-100 p-4 shadow-sm accent-bar">
+                <div class="card h-100 p-4 shadow-sm dashboard-card border-start border-primary border-4">
 
                     <h4>
                         Vue Globale
@@ -68,7 +94,7 @@
             <!-- GAINS PAR OPERATEUR -->
             <div class="col-md-8">
 
-                <div class="card p-4 shadow-sm summary-card">
+                <div class="card p-4 shadow-sm dashboard-card gain-card">
 
                     <h4 class="mb-3">
                         Gains par opérateur
@@ -84,11 +110,14 @@
 
                                 <div class="col-md-6">
 
-                                    <div class="card stat-card text-dark p-3 shadow-sm">
+                                    <div class="card text-dark p-3 operator-card shadow-sm">
 
-                                        <div class="stat-label"><?= esc($g['operateur']) ?></div>
+                                        <h5>
+                                            <?= esc($g['operateur']) ?>
+                                        </h5>
 
-                                        <div class="stat-value">
+
+                                        <div class="fs-3 fw-bold text-success">
 
                                             <?= number_format($g['gain'], 2) ?> Ar
 
@@ -108,7 +137,7 @@
 
                         <?php else: ?>
 
-                            <p class="text-white-50 mb-0">
+                            <p>
                                 Aucun gain enregistré.
                             </p>
 
@@ -128,7 +157,7 @@
             <!-- FRAIS -->
             <div class="col-md-4">
 
-                <div class="card action-card h-100 p-4 shadow-sm accent-bar">
+                <div class="card h-100 p-4 shadow-sm dashboard-card border-start border-info border-4">
 
                     <h4>
                         Grille Tarifaire
@@ -156,7 +185,7 @@
             <!-- TYPES OPERATIONS -->
             <div class="col-md-4">
 
-                <div class="card action-card h-100 p-4 shadow-sm accent-bar">
+                <div class="card h-100 p-4 shadow-sm dashboard-card border-start border-warning border-4">
 
 
                     <h4>
@@ -187,7 +216,7 @@
             <!-- PREFIXES -->
             <div class="col-md-4">
 
-                <div class="card action-card h-100 p-4 shadow-sm accent-bar">
+                <div class="card h-100 p-4 shadow-sm dashboard-card border-start border-danger border-4">
 
 
                     <h4>
@@ -200,15 +229,13 @@
                     </p>
 
 
-                    <div class="d-flex flex-column gap-2 mt-auto">
-                        <a href="<?= base_url('admin/prefixes') ?>" class="btn btn-outline-primary btn-sm">
-                            Gestion des préfixes
-                        </a>
+                    <a href="<?= base_url('admin/prefixes') ?>">
+                        Gestion des préfixes
+                    </a>
 
-                        <a href="<?= base_url('admin/commissions') ?>" class="btn btn-outline-primary btn-sm">
-                            Gestion des commissions
-                        </a>
-                    </div>
+                    <a href="<?= base_url('admin/commissions') ?>">
+                        Gestion des commissions
+                    </a>
 
 
                 </div>

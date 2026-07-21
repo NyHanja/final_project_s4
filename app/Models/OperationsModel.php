@@ -193,6 +193,7 @@ class OperationsModel extends Model
         // FIX : On initialise l'opérateur principal (1) pour éviter l'erreur "Undefined array key 1"
         $gains = [
             $monOperateur => [
+                'idOperateur' => $monOperateur,
                 'operateur' => 'Mon Opérateur', // Vous pouvez remplacer par le vrai nom (ex: Orange, Airtel...)
                 'gain' => 0
             ]
@@ -231,6 +232,7 @@ class OperationsModel extends Model
                     // Initialisation dynamique pour les AUTRES opérateurs partenaires
                     if (!isset($gains[$idOperateur])) {
                         $gains[$idOperateur] = [
+                            'idOperateur' => $idOperateur,
                             'operateur' => $nomOperateur,
                             'gain' => 0
                         ];

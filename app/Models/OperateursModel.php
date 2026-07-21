@@ -8,7 +8,7 @@ class OperateursModel extends Model
 {
     protected $table = 'operateurs';
     protected $primaryKey = 'idOperateurs';
-    protected $allowedFields = ['libelle'];
+    protected $allowedFields = ['nom'];
 
     public function getSoldeOperateur(int $idOperateurExclu = 1): array
     {
@@ -21,20 +21,25 @@ class OperateursModel extends Model
         foreach ($operations as $operation) {
             $idOperateur = $operation['idOperateurs'];
 
-            $montant = $operation['montant'] - $operation['fraisAppliques'];
+            $montant = (float)($operation['montant'] ?? 0) - (float)($operation['fraisAppliques'] ?? 0);
 
-            $commissionData = (new CommissionModel())->find($idOperateur);
+            $commissionData = (new CommissionModel())
+                ->where('idOperateurs', $idOperateur)
+                ->first();
 
             if (!$commissionData) {
                 continue;
             }
 
-            $commission = $montant * ($commissionData['pourcentage'] / 100)+$montant;
+            $commission = $montant + ($montant * ((float)$commissionData['pourcentage'] / 100));
+
+            $operateur = $this->find($idOperateur);
+            $nomOperateur = $operateur['nom'] ?? ('Opérateur #' . $idOperateur);
 
             if (!isset($solde[$idOperateur])) {
                 $solde[$idOperateur] = [
                     'idOperateur' => $idOperateur,
-                    'libelle' => $this->find($idOperateur)['libelle'],
+                    'nom' => $nomOperateur,
                     'solde' => 0
                 ];
             }

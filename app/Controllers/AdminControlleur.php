@@ -7,8 +7,18 @@ class AdminControlleur extends BaseController
     public function dashboard(): string
     {
         $operationModel = new \App\Models\OperationsModel();
+        $operateursModel = new \App\Models\OperateursModel();
         
-                        $data['gains'] = $operationModel->gainParOperateur();
+        $data['gains'] = $operationModel->gainParOperateur();
+        $data['solde'] = $operateursModel->getSoldeOperateur();
+        $data['soldeByOperateurId'] = [];
+
+        foreach ($data['solde'] as $s) {
+            if (isset($s['idOperateur'])) {
+                $data['soldeByOperateurId'][(int)$s['idOperateur']] = $s;
+            }
+        }
+
         return view('admin/dashboard', $data);
     }
 
